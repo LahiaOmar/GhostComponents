@@ -13,7 +13,8 @@ class Cli{
     {option: '-e, --entry-point <type>', description: 'Path of entry point'},
     {option: '-r, --root-folder <type>', description: 'Path of root folder'},
     {option: '-v, --version', description: 'version'},
-    {option: '-u, --usage', description: 'How to use the CLI'}
+    {option: '-u, --usage', description: 'How to use the CLI'},
+    {option: '-s, --skip', description: 'folders to skip'}
   ]
   program: Command
 

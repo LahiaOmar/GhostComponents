@@ -4,6 +4,7 @@ const cli = new Cli()
 const {
   version,
   usage,
+  skip,
   rootFolder,
   entryPoint, } = cli.argvParsing()
 
