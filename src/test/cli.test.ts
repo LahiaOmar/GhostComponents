@@ -1,4 +1,4 @@
-import Cli from '../src/cli'
+import Cli from '../cli'
 
 describe("TESTING CLI", () => {
   let cli = new Cli()

@@ -1,6 +1,10 @@
 import fs from 'fs/promises'
 import path from 'path'
 
+export const resolveIndexFile = (dirPath:string) => {
+  return ""
+}
+
 export const resolvePackageJson = (dirPath:string) => {
 
   return ""
@@ -12,6 +16,7 @@ export const parse = (p:string) => {
 export const join = (...p:string[]) => {
   return path.join(...p)
 }
+
 export const readFile = async (filePath:string) => {
   const file = await fs.readFile(filePath, 'utf8')
   return file

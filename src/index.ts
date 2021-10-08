@@ -1,4 +1,4 @@
-import Cli from './cli'
+import Cli from './cli' 
 
 const cli = new Cli()
 const {
@@ -17,8 +17,6 @@ if(usage){
   cli.showUsage()
   process.exit(0)
 }
-
 if(rootFolder && entryPoint){
-  (async () => {
-  })()
 }
+
