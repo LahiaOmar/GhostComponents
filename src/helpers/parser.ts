@@ -3,46 +3,39 @@ import {
   ExportSpecifier,
   ExportDefaultSpecifier,
   ExportNamespaceSpecifier,
-  ImportSpecifier, 
-  ImportDefaultSpecifier,
   FunctionDeclaration, 
   TSDeclareFunction, 
   ClassDeclaration, 
   Expression, 
-  ImportNamespaceSpecifier,
   File} from '@babel/types'
 import traverse from '@babel/traverse'
 
+import { isValideImport } from '../helpers/fs'
 
-const isValideImport = (imp:string) => {
-  return imp.startsWith('.')
-}
-
-/**
- * 
- * @param {String} file 
- * @paran {Object} options
- */
-
+type specifierNode = {local: string, imported: string}
 interface ImportNode {
   source: string,
-  specifiers: Array<ImportSpecifier | ImportDefaultSpecifier | ImportNamespaceSpecifier>
+  specifiers: Array<specifierNode>
 }
-
 interface ExportNode { 
   specifiers?: Array<ExportSpecifier | ExportDefaultSpecifier | ExportNamespaceSpecifier>;
   declaration?: FunctionDeclaration | TSDeclareFunction | ClassDeclaration | Expression;
 }
-
-interface ParseResult {
+export interface ParseResult {
   ast: File,
   importStatement: Array<ImportNode>,
   JSXtags: Array<string>,
   exportStatements: Array<ExportNode>
 }
 
+/**
+ * Transform a file to an AST structure
+ * @param {String} file - file content 
+ * @param {Object} options - parsing content
+*/
+
 export const fileASTparser = (file:string, options:ParserOptions) : ParseResult => {
-  options = { sourceType: 'module', plugins: ['jsx'], ...options }
+  options = { sourceType: 'unambiguous', plugins: ['jsx','typescript'], ...options }
   const ast:File = parse(file, options)
 
   let importStatement:Array<ImportNode> = []
@@ -52,8 +45,22 @@ export const fileASTparser = (file:string, options:ParserOptions) : ParseResult 
   traverse(ast, {
     ImportDeclaration({node}) {
       const { source, specifiers } = node
+      let sps:Array<specifierNode> = []
+
       if(isValideImport(source.value)){
-        importStatement.push({source: source.value, specifiers: specifiers})
+        specifiers.forEach(sp => {
+          let local = '', imported = ''
+          if(sp.type === "ImportSpecifier" && sp.imported.type == "Identifier"){
+            local = sp.local.name
+            imported = sp.imported.name
+          }
+          else if(sp.type === "ImportDefaultSpecifier"){
+            local = sp.local.name
+            imported = sp.local.name
+          }
+          sps.push({local, imported})
+        })
+        importStatement.push({source: source.value, specifiers: sps})
       }
     },
     JSXOpeningElement({node}) {

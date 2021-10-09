@@ -13,6 +13,5 @@ describe("TESTING AST PARSER", () => {
 
     const {importStatement, exportStatements, JSXtags} = fileASTparser(stringCode, {})
     
-    
   })
 })

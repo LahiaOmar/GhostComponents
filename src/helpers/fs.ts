@@ -1,14 +1,69 @@
 import fs from 'fs/promises'
 import path from 'path'
+import {fileASTparser} from './parser'
 
-export const resolveIndexFile = (dirPath:string) => {
-  return ""
+export const resolveIndexFile = async (dirPath:string, componentName:string):Promise<string> => {
+  // Read the file
+  const indexPath = join(dirPath, 'index.js')
+  const file = await readFile(indexPath)
+  // Extracte the export
+  const {exportStatements, importStatement} = fileASTparser(file, {})
+  // find the export.
+
+  let foundExport = false
+
+  exportStatements.forEach(({specifiers, declaration}) => {
+    if(specifiers){
+      specifiers.forEach(sp => {
+        if(sp.type === "ExportSpecifier" && sp.exported.type === "Identifier"){
+          const {local, exported} = sp
+          if(local.name !== componentName && exported.name === componentName){
+            componentName = local.name
+            foundExport = true;
+          }
+          if(local.name === componentName && exported.name === componentName){
+            foundExport = true
+          }
+        }
+      })
+    }
+    if(declaration && declaration.type === "Identifier"){
+      if(declaration.name === componentName ){
+        foundExport = true
+      }
+    }
+  })
+
+  if(!foundExport){
+    throw new Error(`The component ${componentName} is not found in ${indexPath}`)
+  }
+  let componentPath = ''
+
+  importStatement.forEach(({specifiers, source}) => {
+    specifiers.forEach(({local, imported}) => {
+      if(local === componentName || imported === componentName)
+        componentPath = source
+    })
+  })
+
+  // and map it to his import statement.
+  return componentPath
 }
 
-export const resolvePackageJson = (dirPath:string) => {
+export const resolvePackageJson = async (dirPath:string, componentName: string):Promise<string> => {
+  const packagePath = join(dirPath, 'package.json')
+  const file = await readFile(packagePath)
 
-  return ""
+  const jsonFile = JSON.parse(file)
+  const {name, main} = jsonFile
+  
+  if(name !== componentName){
+    throw new Error(`name : ${name} in the package.json don't match with component name ${componentName}`)
+  }
+
+  return main
 }
+
 export const parse = (p:string) => {
   return path.parse(p)
 }
@@ -54,16 +109,24 @@ export const readDirectory = async (dirPath:string) => {
   return dirContent
 }
 
-export const isValidDirectory = async (p:string) => {
+export const isValidDirectory = async (p:string, toSkip:Array<string>): Promise<boolean> => {
   const isDir = await isDirectory(p)
   if (!isDir) {
     return false
   }
-  // we should skip this directory names. 
-  const skippedDirs = ["node_modules", "test", "tests", "styles"]
-  const dirName:string|undefined = p.split(path.sep).pop()
-  const skip = skippedDirs.includes(dirName||'')
-  return !skip
+
+  const dir = p.split('/').pop()
+  if(!dir) return false
+
+  let isValid = true
+  
+  toSkip.forEach(m => {
+    if(dir.match(m)){
+      isValid = false
+    }
+  })
+  
+  return isValid 
 }
 
 export const isReactComponent = async (file:string, p:string) => {
@@ -80,4 +143,8 @@ export const isReactComponent = async (file:string, p:string) => {
   ]
   // it should containe import react from 'react'
   return file.includes(shouldContaine[0])
+}
+
+export const isValideImport = (imp:string) => {
+  return imp.startsWith('.')
 }
