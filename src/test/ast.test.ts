@@ -10,8 +10,9 @@ describe("TESTING AST PARSER", () => {
     </>
     const name = "omar"
     `
-
     const {importStatement, exportStatements, JSXtags} = fileASTparser(stringCode, {})
     
+    expect(JSXtags).toContain("App")
+    expect(JSXtags).toContain("Container")
   })
 })

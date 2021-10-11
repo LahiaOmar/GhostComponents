@@ -1,3 +1,4 @@
+import { throwStatement } from '@babel/types'
 import {
   isFile,
   isValidDirectory,
@@ -12,7 +13,7 @@ import {
 } from './helpers/fs'
 
 import {fileASTparser, ParseResult} from './helpers/parser'
-
+import path from 'path'
 /***
  * API
  *  
@@ -35,6 +36,12 @@ export class Api {
     
     this.skip = ["node_modules", "test", "tests", "styles"]
     this.skip = this.skip.concat(skip)
+    this.resolvePath();
+  }
+
+  private resolvePath(){
+    this.rootFolder = path.resolve(__dirname, this.rootFolder)
+    this.entryPoint = path.resolve(__dirname, this.entryPoint)
   }
 
   /**

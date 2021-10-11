@@ -130,19 +130,17 @@ export const isValidDirectory = async (p:string, toSkip:Array<string>): Promise<
 }
 
 export const isReactComponent = async (file:string, p:string) => {
-  const isFilePath = await isFile(p)
-  if (!isFilePath) return false
-
-  // have a .js extension
   const { ext, base } = path.parse(p)
   const isJsExtention = ext === '.js'
   if (!isJsExtention || base.includes('test')) return false
 
-  const shouldContaine = [
-    `import React from 'react'`
-  ]
-  // it should containe import react from 'react'
-  return file.includes(shouldContaine[0])
+  const impReactReg = /import\s*(React|\* as React)[\w{}\s,'"]*\s*from \s*('|")react('|")(;)?/g
+
+  const isContaines = file.split('\n').map(line => {
+    const match = line.match(impReactReg)
+    return (match && match.length > 0)
+  })
+  return isContaines.includes(true)
 }
 
 export const isValideImport = (imp:string) => {
