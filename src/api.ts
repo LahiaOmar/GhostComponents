@@ -1,4 +1,3 @@
-import { throwStatement } from '@babel/types'
 import {
   isFile,
   isValidDirectory,
@@ -13,7 +12,6 @@ import {
 } from './helpers/fs'
 
 import {fileASTparser, ParseResult} from './helpers/parser'
-import path from 'path'
 /***
  * API
  *  
@@ -40,8 +38,8 @@ export class Api {
   }
 
   private resolvePath(){
-    this.rootFolder = path.resolve(__dirname, this.rootFolder)
-    this.entryPoint = path.resolve(__dirname, this.entryPoint)
+    this.rootFolder = join(process.cwd(), this.rootFolder)
+    this.entryPoint = join(process.cwd(), this.entryPoint)
   }
 
   /**
