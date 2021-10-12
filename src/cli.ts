@@ -9,20 +9,25 @@ interface Option {
  */
 class Cli{
   
-  CLIOptions:Array<Option> = [
-    {option: '-e, --entry-point <type>', description: 'Path of entry point'},
-    {option: '-r, --root-folder <type>', description: 'Path of root folder'},
+  private CLIOptions:Array<Option> = [
     {option: '-v, --version', description: 'version'},
     {option: '-u, --usage', description: 'How to use the CLI'},
     {option: '-s, --skip', description: 'folders to skip'}
   ]
-  program: Command
+  private requiredOption:Array<Option> = [
+    {option: '-e, --entry-point <type>', description: 'Path of entry point'},
+    {option: '-r, --root-folder <type>', description: 'Path of root folder'},
+  ]
+  private program: Command
 
   constructor(){
     this.program = new Command()
+  
     this.CLIOptions.forEach(({option, description}) => {
       this.program.option(option, description)
     })
+
+    this.requiredOption.forEach(({option, description}) => this.program.requiredOption(option, description))
   }
 
   argvParsing = () => {
@@ -31,11 +36,15 @@ class Cli{
   }
 
   showVersion = () => {
-    console.log("1.0.0")
+    
   }
 
   showUsage = () => {
     console.log("Ghose Component CLI, ./GhostComponent ./ ./index.js")
+  }
+
+  exitOverride = () => {
+    this.program.exitOverride()
   }
 }
 
