@@ -115,13 +115,13 @@ export const isValidDirectory = async (p:string, toSkip:Array<string>): Promise<
     return false
   }
 
-  const dir = p.split('/').pop()
-  if(!dir) return false
+  const {name} = parse(p)
+  if(!name) return false
 
   let isValid = true
   
   toSkip.forEach(m => {
-    if(dir.match(m)){
+    if(name.match(m)){
       isValid = false
     }
   })
