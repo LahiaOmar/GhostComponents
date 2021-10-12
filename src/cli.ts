@@ -56,7 +56,7 @@ class Cli{
     this.program.exitOverride()
   }
 
-  toSkip = async ():Promise<Array<string>> => {
+  askForSkipFiles = async ():Promise<Array<string>> => {
     let toSkipPatterns:Array<string> = []
 
     const skipQuestion = {
@@ -74,6 +74,27 @@ class Cli{
     }
     
     return toSkipPatterns
+  }
+
+  askToSaveResult = async (data:Object) => {
+    const response:any = await this.enq.prompt({
+      type: 'select',
+      name: 'save',
+      message: 'to save the result, choose a file format, or chose not save',
+      choices: ['JSON','Not save']
+    });
+
+    if(response.save === 'JSON'){
+      const question = {
+        type : 'input',
+        name: 'fileName',
+        message: 'chose a file name, (default one is Ghosts.json)'
+      }
+  
+      const fileName:any = await this.enq.prompt(question)
+
+      this.saveResult(SaveOptions.JSON, data ,fileName.fileName);
+    }
   }
 
   saveResult = async (type:SaveOptions, data:Object, fileName:string) => {
