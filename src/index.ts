@@ -1,6 +1,8 @@
 import Cli from './cli'
+import { Api } from './api'
 
 const cli = new Cli()
+
 const {
   version,
   usage,
@@ -18,5 +20,12 @@ if(usage){
   process.exit(0)
 }
 if(rootFolder && entryPoint){
+  (async () => {
+    const skip = await cli.toSkip()
+
+    const api = new Api(rootFolder, entryPoint, skip)
+    const ghost = await api.searchGhost()
+    
+  })()
 }
 
