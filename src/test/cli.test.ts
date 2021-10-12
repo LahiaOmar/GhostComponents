@@ -1,4 +1,4 @@
-import Cli from '../cli'
+import Cli, {SaveOptions} from '../cli'
 
 describe("TESTING CLI", () => {
   
@@ -18,5 +18,16 @@ describe("TESTING CLI", () => {
         cli.exitOverride()
         cli.argvParsing()
       }).toThrow()
+  })
+
+  it("should save the result on a json file", async () => {
+    let cli = new Cli()
+    const { JSON } = SaveOptions
+    
+    const result = {
+      "components" : ["/home/app.js"]
+    }
+
+    await cli.saveResult(JSON, result, 'Ghosts')
   })
 })

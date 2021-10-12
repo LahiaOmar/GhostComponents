@@ -1,9 +1,15 @@
 import {Command} from 'commander'
 import Enquirer from 'enquirer'
-
+import {
+  saveToJSON
+} from './helpers/fs'
 interface Option {
   option: string,
   description: string
+}
+
+export enum SaveOptions {
+  JSON = 'JSON'
 }
 
 /**
@@ -62,13 +68,23 @@ class Cli{
     const skiped:any = await this.enq.prompt(skipQuestion)
 
     if(skiped.skip != ''){
-      const {skip} = skiped
-      toSkipPatterns = skip.split(' ').map((s:any) => {
+      toSkipPatterns = skiped.skip.split(' ').map((s:any) => {
         return s.replace(/"/g, ' ');
       })
     }
     
     return toSkipPatterns
+  }
+
+  saveResult = async (type:SaveOptions, data:Object, fileName:string) => {
+    switch(type){
+      case SaveOptions.JSON:
+        await saveToJSON(data, fileName)
+        break
+      
+      default:
+        throw new Error('Wrong type')
+    }
   }
 
 }
