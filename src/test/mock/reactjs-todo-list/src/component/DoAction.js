@@ -1,6 +1,5 @@
 import React from 'react'
-import { thisTypeAnnotation } from '@babel/types'
-
+import Header from './Header/Header'
 class DoAction extends React.Component {
   done = (key) => {
     // event.preventDefault()
@@ -12,6 +11,7 @@ class DoAction extends React.Component {
     const actionsKeys = Object.keys(this.props.actions)
     return (
       < div className="card card-width">
+        <Header />
         <div className="card-header">DOING</div>
         <ol>
           {actionsKeys.map(key => {

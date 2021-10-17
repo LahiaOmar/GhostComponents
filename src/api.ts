@@ -1,3 +1,4 @@
+import { thisExpression } from '@babel/types'
 import {
   isFile,
   isValidDirectory,
@@ -9,6 +10,7 @@ import {
   resolvePackageJson,
   join,
   parse,
+  findFileExtension
 } from './helpers/fs'
 
 import {fileASTparser, ParseResult} from './helpers/parser'
@@ -23,6 +25,7 @@ export class Api {
   private allComponents: Map<string, ParseResult> = new Map()
   private usedComponents: Array<string> = []  
   private ghosts: Array<string> = []
+  private extensions:Array<string> = ['.js', '.ts', '.tsx', '.node']
   /**
    * 
    * @param {string} rootFolder - Path to the root folder 
@@ -64,7 +67,7 @@ export class Api {
       const isDirPath = await isValidDirectory(currentPath, this.skip)
       if (isFilePath) {
         const file = await readFile(currentPath)
-        const isComponent = await isReactComponent(file, currentPath)
+        const isComponent = await isReactComponent(file, currentPath, this.extensions)
         if (isComponent) {
           const fileAST = fileASTparser(file, {})
           this.allComponents.set(currentPath, fileAST)
@@ -85,8 +88,6 @@ export class Api {
    * @param {string} filePath - path of the component, the function start with the entry point of the app.
    */
   private async findUsedComponents(filePath:string){
-    const file = await readFile(filePath)
-    
     const currentCmp  = this.allComponents.get(filePath)
     if(!currentCmp) return
 
@@ -116,27 +117,21 @@ export class Api {
     for (let { path, component } of components) {
       const { dir } = parse(filePath)
       path = join(dir, path)
-
-      const isPathFile = await isFile(path)
+      
       const isPathDir = await isDirectory(path)
 
       if (isPathDir) {
-        const foundIndex = await isFile(join(path, 'index.js'))
-        const foundPackage = await isFile(join(path, 'package.json'))
+        const indexPath = await resolveIndexFile(path, component, this.extensions)
+        const packagePath = await resolvePackageJson(path, component)
 
-        if (foundIndex) {
-          const restOfPath = await resolveIndexFile(path, component)
-          path = join(path, restOfPath + '.js')
-        }
-
-        if (foundPackage) {
-          const restOfPath = await resolvePackageJson(path, component)
-          path = join(path, restOfPath + '.js')
-        }
+        path = path + ( indexPath.length ? indexPath : packagePath )
       }
       else {
-        if (!isPathFile) {
-          path = path + '.js'
+        const endWithExt = this.extensions.map(ext => path.endsWith(ext)).some(el => el)
+        
+        if(!endWithExt){
+          const fileExt = await findFileExtension(path, this.extensions)
+          path = path + fileExt
         }
       }
       await this.findUsedComponents(path)

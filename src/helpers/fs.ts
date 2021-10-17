@@ -2,9 +2,10 @@ import fs from 'fs/promises'
 import path from 'path'
 import {fileASTparser} from './parser'
 
-export const resolveIndexFile = async (dirPath:string, componentName:string):Promise<string> => {
+export const resolveIndexFile = async (dirPath:string, componentName:string, extensions:Array<string>):Promise<string> => {
   // Read the file
-  const indexPath = join(dirPath, 'index.js')
+  const fileExt = await findFileExtension(dirPath, extensions)
+  const indexPath = join(dirPath, 'index' + fileExt)
   const file = await readFile(indexPath)
   // Extracte the export
   const {exportStatements, importStatement} = fileASTparser(file, {})
@@ -62,6 +63,19 @@ export const resolvePackageJson = async (dirPath:string, componentName: string):
   }
 
   return main
+}
+
+export const findFileExtension = async (path:string, extensions:Array<string>) => {
+  const {dir, base} = parse(path)
+  const dirContent = await readDirectory(dir)
+  
+  for(const contentName of dirContent){
+    const foundExt = extensions.find(ext => base + ext === contentName)
+    if(foundExt){
+      return foundExt
+    }
+  }
+  // TODO: throw Error : we couldn't find the extension of this file. {path}
 }
 
 export const parse = (p:string) => {
@@ -129,10 +143,11 @@ export const isValidDirectory = async (p:string, toSkip:Array<string>): Promise<
   return isValid 
 }
 
-export const isReactComponent = async (file:string, p:string) => {
-  const { ext, base } = path.parse(p)
-  const isJsExtention = ext === '.js'
-  if (!isJsExtention || base.includes('test')) return false
+export const isReactComponent = async (file:string, p:string, extensions:Array<string>) => {
+  const { ext, name } = path.parse(p)
+  const foundExt = extensions.includes(ext)
+
+  if (!foundExt || name.includes('.test')) return false
 
   const impReactReg = /import\s*(React|\* as React)[\w{}\s,'"]*\s*from \s*('|")react('|")(;)?/g
 
