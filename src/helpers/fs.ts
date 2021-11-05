@@ -1,38 +1,27 @@
 import fs from 'fs/promises'
 import path from 'path'
-import {fileASTparser} from './parser'
+import {AstParser} from './parser'
 
 export const resolveIndexFile = async (dirPath:string, componentName:string, extensions:Array<string>):Promise<string> => {
   // Read the file
   const fileExt = await findFileExtension(dirPath, extensions)
   const indexPath = join(dirPath, 'index' + fileExt)
   const file = await readFile(indexPath)
+  const astParser = new AstParser()
   // Extracte the export
-  const {exportStatements, importStatement} = fileASTparser(file, {})
+  const {exportStatements,importStatements} = astParser.parse(file)
   // find the export.
 
   let foundExport = false
 
-  exportStatements.forEach(({specifiers, declaration}) => {
-    if(specifiers){
-      specifiers.forEach(sp => {
-        if(sp.type === "ExportSpecifier" && sp.exported.type === "Identifier"){
-          const {local, exported} = sp
-          if(local.name !== componentName && exported.name === componentName){
-            componentName = local.name
-            foundExport = true;
-          }
-          if(local.name === componentName && exported.name === componentName){
-            foundExport = true
-          }
-        }
-      })
-    }
-    if(declaration && declaration.type === "Identifier"){
-      if(declaration.name === componentName ){
+  exportStatements.forEach(({local, exported}) => {
+      if(local !== componentName && exported === componentName){
+        componentName = local
+        foundExport = true;
+      }
+      if(local === componentName && exported === componentName){
         foundExport = true
       }
-    }
   })
 
   if(!foundExport){
@@ -40,7 +29,7 @@ export const resolveIndexFile = async (dirPath:string, componentName:string, ext
   }
   let componentPath = ''
 
-  importStatement.forEach(({specifiers, source}) => {
+  importStatements.forEach(({specifiers, source}) => {
     specifiers.forEach(({local, imported}) => {
       if(local === componentName || imported === componentName)
         componentPath = source

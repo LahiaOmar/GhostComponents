@@ -1,4 +1,3 @@
-import { thisExpression } from '@babel/types'
 import {
   isFile,
   isValidDirectory,
@@ -13,7 +12,18 @@ import {
   findFileExtension
 } from './helpers/fs'
 
-import {fileASTparser, ParseResult} from './helpers/parser'
+import {
+  AstParser, 
+  ParseResult,
+  ImportNode,
+  ExportNode,
+  Component,
+  ComponentInfo
+} from './helpers/parser'
+
+
+
+
 /***
  * API
  *  
@@ -23,9 +33,11 @@ export class Api {
   private entryPoint: string
   private skip: Array<string>
   private allComponents: Map<string, ParseResult> = new Map()
-  private usedComponents: Array<string> = []  
+  private usedComponents: Array<Component> = []  
   private ghosts: Array<string> = []
   private extensions:Array<string> = ['.js', '.ts', '.tsx', '.node']
+  private astParser:AstParser
+
   /**
    * 
    * @param {string} rootFolder - Path to the root folder 
@@ -34,7 +46,8 @@ export class Api {
   constructor(rootFolder:string, entryPoint:string, skip:Array<string>){
     this.rootFolder = rootFolder
     this.entryPoint = entryPoint
-    
+    this.astParser = new AstParser()
+
     this.skip = ["node_modules", "test", "tests", "styles"]
     this.skip = this.skip.concat(skip)
     this.resolvePath();
@@ -44,16 +57,19 @@ export class Api {
     this.rootFolder = join(process.cwd(), this.rootFolder)
     this.entryPoint = join(process.cwd(), this.entryPoint)
   }
-
+  
   /**
    * start searching for unused component. 
    */
   async searchGhost(){
+    // resolving the root component from the entry point
+    console.log("start findAllComponents ")
     await this.findAllComponents(this.rootFolder)
 
-    await this.findUsedComponents(this.entryPoint)
+    console.log("start find used components")
+    await this.findUsedComponents(this.entryPoint, null)
 
-    this.findUnusedComponents()
+    // this.findUnusedComponents()
     
     return this.ghosts
   }
@@ -69,60 +85,95 @@ export class Api {
         const file = await readFile(currentPath)
         const isComponent = await isReactComponent(file, currentPath, this.extensions)
         if (isComponent) {
-          const fileAST = fileASTparser(file, {})
+          // every file -> instance of AstParser. 
+          const fileAST = this.astParser.parse(file)
           this.allComponents.set(currentPath, fileAST)
         }
       }
       else if (isDirPath) {
         let files = await readDirectory(currentPath)
-  
+        
         for (const file of files) {
-          const pt = join(currentPath, file)
-          await this.findAllComponents(pt)
+          const nextPath = join(currentPath, file)
+          await this.findAllComponents(nextPath)
         }
       }
   }
 
   /**
    * Find the used components if the app.
-   * @param {string} filePath - path of the component, the function start with the entry point of the app.
+   * @param {string} filePath - path of the component.
    */
-  private async findUsedComponents(filePath:string){
+  private async findUsedComponents(filePath:string, last:string | null){
     const currentCmp  = this.allComponents.get(filePath)
     if(!currentCmp) return
+    const {importStatements, exportStatements, components} = currentCmp
 
-    if (!this.usedComponents.find(p => p === filePath)) {
-      this.usedComponents.push(filePath)
+    let fileComponents = [...components]
+    // find if there is a different local name rather than the export one.
+    let localComponentName:string = last ? last : ''
+    
+    exportStatements.forEach(exp => {
+      if(exp.exported != exp.local && exp.exported === localComponentName){
+        localComponentName = exp.local
+      }
+    })
+
+    console.log({localComponentName, ...components})
+    // find fileRootComponent.
+    /**
+     * filter file components:  
+     *  - nextExternalComponents : we can find them in import paths (./).
+     *  - usedLocalComponents : we can find them recursivly from the local root componnent
+     * 
+     * - first find the local used component
+     * - second find the next external component based on the local used component.
+     */
+    const nextComponents:{name:string, path:string}[] = []
+
+    const filterNextComponents = async (current:Component, components:Component[]) => {
+      console.log(current, ...components)
+      //add current to used component
+      for(const tag of current.tags){
+        const foundNext = components.findIndex(({info}) => info.name === tag )
+        const nextComponent = components.find(({info}) => info.name === tag)
+        if(foundNext > 0 && nextComponent){
+          components = components.filter((_, index) => index !== foundNext)
+          this.usedComponents.push(current)
+          await filterNextComponents(nextComponent, components)
+        } 
+        else{
+          // if it's a external
+          const foundExternal = importStatements.find(({source,specifiers}) => {
+            const found = specifiers.find(sp => sp.local === tag)
+            return found && source.startsWith('.')
+          })
+          if(foundExternal){
+            // console.log("found external ", foundExternal)
+            nextComponents.push({name:tag, path : foundExternal.source})            
+            this.usedComponents.push(current)
+          }
+        }
+      }
+      return
+    }
+    let rootComponent = fileComponents.find(({info}) => info.name === localComponentName )
+    
+    if(!rootComponent){
+      rootComponent = fileComponents[0]
+      fileComponents = fileComponents.slice(1, fileComponents.length)
     }
     
-    const {importStatement, JSXtags} = currentCmp
-    
-    const components:Array<{component:string, path:string}> = []
-    
-    JSXtags.forEach(tag => {
-      importStatement.forEach(imp => {
-        const { specifiers, source } = imp
-        specifiers.forEach(sp => {
-          let tagIsFound = false
-          if (sp.local !== undefined) tagIsFound = sp.local === tag
-          if (sp.imported !== undefined && !tagIsFound) tagIsFound = sp.imported === tag
-          if (tagIsFound) {
-            const component = (sp.imported) ? sp.imported: sp.local
-            components.push({ component, path: source })
-          }
-        })
-      })
-    })
-    
-    for (let { path, component } of components) {
+    await filterNextComponents(rootComponent, fileComponents)
+    for (let { path, name } of nextComponents) {
       const { dir } = parse(filePath)
       path = join(dir, path)
       
       const isPathDir = await isDirectory(path)
 
       if (isPathDir) {
-        const indexPath = await resolveIndexFile(path, component, this.extensions)
-        const packagePath = await resolvePackageJson(path, component)
+        const indexPath = await resolveIndexFile(path, name, this.extensions)
+        const packagePath = await resolvePackageJson(path, name)
 
         path = path + ( indexPath.length ? indexPath : packagePath )
       }
@@ -134,7 +185,7 @@ export class Api {
           path = path + fileExt
         }
       }
-      await this.findUsedComponents(path)
+      await this.findUsedComponents(path, name)
     }
   }
 
@@ -143,10 +194,10 @@ export class Api {
    */
   private findUnusedComponents(){
     this.allComponents.forEach((_, key) => {
-      const found = this.usedComponents.find( p => p === key)
-      if(!found){
-        this.ghosts.push(key)
-      }
+      // const found = this.usedComponents.find( p => p === key)
+      // if(!found){
+      //   this.ghosts.push(key)
+      // }
     })    
   }
 }
