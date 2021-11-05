@@ -1,4 +1,4 @@
-import {fileASTparser} from '../helpers/parser'
+import {fileASTparser} from '../src/helpers/parser'
 
 describe("TESTING AST PARSER", () => {
   it("should create a ast tree from js code", () => {

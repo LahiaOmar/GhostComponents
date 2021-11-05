@@ -1,4 +1,4 @@
-import Cli, {SaveOptions} from '../cli'
+import Cli, {SaveOptions} from '../src/cli'
 
 describe("TESTING CLI", () => {
   
