@@ -1,6 +1,6 @@
 import {
   isValidDirectory
-} from '../helpers/fs'
+} from '../src/helpers/fs'
 
 describe('TESTING SOME FS HELPERS',() => {
   it("should verify if a path is a valid directory path", async () => {

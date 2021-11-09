@@ -2,9 +2,9 @@ import fs from 'fs/promises'
 import path from 'path'
 import {AstParser} from './parser'
 
-export const resolveIndexFile = async (dirPath:string, componentName:string, extensions:Array<string>):Promise<string> => {
+export const resolveIndexFile = async (dirPath:string, componentName:string, extensions:Array<string>):Promise<string|null> => {
   // Read the file
-  const fileExt = await findFileExtension(dirPath, extensions)
+  const fileExt = await findFileExtension(join(dirPath, 'index') , extensions)
   const indexPath = join(dirPath, 'index' + fileExt)
   const file = await readFile(indexPath)
   const astParser = new AstParser()
@@ -25,7 +25,7 @@ export const resolveIndexFile = async (dirPath:string, componentName:string, ext
   })
 
   if(!foundExport){
-    throw new Error(`The component ${componentName} is not found in ${indexPath}`)
+    return null
   }
   let componentPath = ''
 
@@ -37,11 +37,14 @@ export const resolveIndexFile = async (dirPath:string, componentName:string, ext
   })
 
   // and map it to his import statement.
-  return componentPath
+  return componentPath + fileExt
 }
 
-export const resolvePackageJson = async (dirPath:string, componentName: string):Promise<string> => {
+export const resolvePackageJson = async (dirPath:string, componentName: string):Promise<string|null> => {
   const packagePath = join(dirPath, 'package.json')
+  const foundPackadge = await isFile(packagePath)
+  if(!foundPackadge) 
+    return null
   const file = await readFile(packagePath)
 
   const jsonFile = JSON.parse(file)
@@ -57,7 +60,6 @@ export const resolvePackageJson = async (dirPath:string, componentName: string):
 export const findFileExtension = async (path:string, extensions:Array<string>) => {
   const {dir, base} = parse(path)
   const dirContent = await readDirectory(dir)
-  
   for(const contentName of dirContent){
     const foundExt = extensions.find(ext => base + ext === contentName)
     if(foundExt){

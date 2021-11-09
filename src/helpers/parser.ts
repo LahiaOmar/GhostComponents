@@ -1,20 +1,10 @@
-import {parse, ParserOptions} from '@babel/parser'
+import { parse } from '@babel/parser'
 import {
-  ExportSpecifier,
-  ExportDefaultSpecifier,
-  ExportNamespaceSpecifier,
-  FunctionDeclaration, 
-  TSDeclareFunction, 
-  ClassDeclaration, 
-  Expression, 
   File,
-  ImportDeclaration,
   Node,
-  logicalExpression,
   } from '@babel/types'
-import traverse, { NodePath } from '@babel/traverse'
 
-import { isValideImport } from '../helpers/fs'
+  import { isValideImport } from '../helpers/fs'
 
 type specifierNode = {local: string, imported: string}
 export interface ImportNode {
@@ -53,7 +43,7 @@ export class AstParser {
   private ast:File | null = null
   private fileContent:string | null = null
   private filters:{(node:Node): void}[] = []
-  private components:Array<{info: ComponentInfo, tags : Array<string>}> = []
+  private components:Component[] = []
   private _components:Array<{info: ComponentInfo, node:any}> = []
   private imports:Array<ImportNode> = []
   private exports:Array<ExportNode> = []
@@ -77,6 +67,7 @@ export class AstParser {
     this.components.length = 0
     this._components.length = 0
     this.imports.length = 0
+    this.exports.length = 0
   }
 
   parse = (content:string) => {
@@ -87,9 +78,9 @@ export class AstParser {
     this.resolveTags()
 
     return {
-      importStatements: this.imports,
-      exportStatements: this.exports,
-      components: this.components, 
+      importStatements: [...this.imports],
+      exportStatements: [...this.exports],
+      components: [...this.components], 
       ast: this.ast
     }
   }
@@ -262,7 +253,7 @@ export class AstParser {
         jsxTag = object.name
       }
 
-      if(jsxTag){
+      if(jsxTag && this.isValidJSX(jsxTag)){
         const componentLn = this.components.length
         const componentIndex = componentLn > 0 ? componentLn - 1 : componentLn
         
@@ -340,72 +331,18 @@ export class AstParser {
   private isObjectNode = (node:Node) => {
     return node && typeof node === 'object' && node.type
   }
+
+  private isValideImport = (path:string) => {
+    return path.startsWith('.')
+  }
+
+  private isValidJSX = (name:string) => {
+    let isValid = false
+    this.imports.forEach(({specifiers}) => {
+      const found = specifiers.find(({imported, local}) => [imported, local].includes(name))
+      if(found)
+        isValid = true
+    })
+    return isValid
+  }
 }
-
-
-// /**
-//  * Transform a file to an AST structure
-//  * @param {String} file - file content 
-//  * @param {Object} options - parsing content
-// */
-
-// export const fileASTparser = (file:string, options:ParserOptions) : ParseResult => {
-//   options = { sourceType: 'unambiguous', plugins: ['jsx','typescript'], ...options }
-//   const ast:File = parse(file, options)
-//   let importStatement:Array<ImportNode> = []
-//   let JSXtags:Array<string> = []
-//   let exportStatements:Array<ExportNode> = []
-
-
-//   traverse(ast, {
-//     ImportDeclaration({node}) {
-//       const { source, specifiers } = node
-//       let sps:Array<specifierNode> = []
-
-//       if(isValideImport(source.value)){
-//         specifiers.forEach(sp => {
-//           let local = '', imported = ''
-//           if(sp.type === "ImportSpecifier" && sp.imported.type == "Identifier"){
-//             local = sp.local.name
-//             imported = sp.imported.name
-//           }
-//           else if(sp.type === "ImportDefaultSpecifier"){
-//             local = sp.local.name
-//             imported = sp.local.name
-//           }
-//           sps.push({local, imported})
-//         })
-//         importStatement.push({source: source.value, specifiers: sps})
-//       }
-//     },
-//     JSXOpeningElement({node}) {
-//       const {name} = node
-//       if(name.type === "JSXMemberExpression"){
-//         const {object} = name
-//         if(object.type === "JSXIdentifier"){
-//           JSXtags.push(object.name)
-//         }
-//       }
-//       else if(node.type === "JSXOpeningElement" && typeof name.name === 'string' ){
-//         const { name:jsxName } = name
-//         JSXtags.push(jsxName)
-//       } 
-//     },
-//     ExportNamedDeclaration(path) {
-//       const { loc, specifiers } = path.node
-//       exportStatements.push({ specifiers })
-//     },
-//     ExportDefaultDeclaration(path) {
-//       const { loc, declaration } = path.node
-//       exportStatements.push({ declaration })
-//     }
-//   });
-
-//   return {
-//     ast,
-//     importStatement,
-//     JSXtags,
-//     exportStatements
-//   }
-// }
-
