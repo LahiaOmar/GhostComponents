@@ -10,13 +10,4 @@ describe("TESTING CLI", () => {
     expect(rootFolder).toBe('./root')
     expect(entryPoint).toBe("./App.js")
   })
-
-  it("should return a ERROR when we not provide root foler and/or entry point", () => {
-      expect(() =>{
-        let cli = new Cli()
-        process.argv = ['','','-e', './App.js']
-        cli.exitOverride()
-        cli.argvParsing()
-      }).toThrow()
-  })
 })
