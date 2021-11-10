@@ -19,15 +19,4 @@ describe("TESTING CLI", () => {
         cli.argvParsing()
       }).toThrow()
   })
-
-  it("should save the result on a json file", async () => {
-    let cli = new Cli()
-    const { JSON } = SaveOptions
-    
-    const result = {
-      "components" : ["/home/app.js"]
-    }
-
-    await cli.saveResult(JSON, result, 'Ghosts')
-  })
 })

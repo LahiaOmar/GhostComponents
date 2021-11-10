@@ -8,8 +8,7 @@ describe("API TESTING", () => {
     const api = new Api(rootFolder, entryPoint, [])
     
     const ghost = await api.searchGhost()
-  
-    expect(ghost).toContain(path.join(process.cwd(), '/test/mock/reactjs-todo-list/src/component/Item.js'
-    ))
+
+    expect(ghost).toContainEqual({name: 'Item', path : path.join(process.cwd(), '/test/mock/reactjs-todo-list/src/component/Item.js')})
   })
 })
