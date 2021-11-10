@@ -2,61 +2,6 @@ import fs from 'fs/promises'
 import path from 'path'
 import {AstParser} from './parser'
 
-export const resolveIndexFile = async (dirPath:string, componentName:string, extensions:Array<string>):Promise<string|null> => {
-  // Read the file
-  const fileExt = await findFileExtension(join(dirPath, 'index') , extensions)
-  const indexPath = join(dirPath, 'index' + fileExt)
-  const file = await readFile(indexPath)
-  const astParser = new AstParser()
-  // Extracte the export
-  const {exportStatements,importStatements} = astParser.parse(file)
-  // find the export.
-
-  let foundExport = false
-
-  exportStatements.forEach(({local, exported}) => {
-      if(local !== componentName && exported === componentName){
-        componentName = local
-        foundExport = true;
-      }
-      if(local === componentName && exported === componentName){
-        foundExport = true
-      }
-  })
-
-  if(!foundExport){
-    return null
-  }
-  let componentPath = ''
-
-  importStatements.forEach(({specifiers, source}) => {
-    specifiers.forEach(({local, imported}) => {
-      if(local === componentName || imported === componentName)
-        componentPath = source
-    })
-  })
-
-  // and map it to his import statement.
-  return componentPath + fileExt
-}
-
-export const resolvePackageJson = async (dirPath:string, componentName: string):Promise<string|null> => {
-  const packagePath = join(dirPath, 'package.json')
-  const foundPackadge = await isFile(packagePath)
-  if(!foundPackadge) 
-    return null
-  const file = await readFile(packagePath)
-
-  const jsonFile = JSON.parse(file)
-  const {name, main} = jsonFile
-  
-  if(name !== componentName){
-    throw new Error(`name : ${name} in the package.json don't match with component name ${componentName}`)
-  }
-
-  return main
-}
-
 export const findFileExtension = async (path:string, extensions:Array<string>) => {
   const {dir, base} = parse(path)
   const dirContent = await readDirectory(dir)
