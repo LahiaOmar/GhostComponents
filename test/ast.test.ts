@@ -1,4 +1,4 @@
-import { AstParser, Component } from "../src/helpers/parser";
+import { AstParser, Component } from "../src/parser";
 import { readFile } from "../src/helpers/fs";
 
 declare global {

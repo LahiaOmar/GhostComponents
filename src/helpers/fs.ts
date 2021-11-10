@@ -1,105 +1,113 @@
-import fs from 'fs/promises'
-import path from 'path'
-import {AstParser} from './parser'
+import fs from "fs/promises";
+import path from "path";
+import { AstParser } from "../parser";
 
-export const findFileExtension = async (path:string, extensions:Array<string>) => {
-  const {dir, base} = parse(path)
-  const dirContent = await readDirectory(dir)
-  for(const contentName of dirContent){
-    const foundExt = extensions.find(ext => base + ext === contentName)
-    if(foundExt){
-      return foundExt
+export const findFileExtension = async (
+  path: string,
+  extensions: Array<string>
+) => {
+  const { dir, base } = parse(path);
+  const dirContent = await readDirectory(dir);
+  for (const contentName of dirContent) {
+    const foundExt = extensions.find((ext) => base + ext === contentName);
+    if (foundExt) {
+      return foundExt;
     }
   }
   // TODO: throw Error : we couldn't find the extension of this file. {path}
-}
+};
 
-export const parse = (p:string) => {
-  return path.parse(p)
-}
+export const parse = (p: string) => {
+  return path.parse(p);
+};
 
-export const join = (...p:string[]) => {
-  return path.join(...p)
-}
+export const join = (...p: string[]) => {
+  return path.join(...p);
+};
 
-export const readFile = async (filePath:string) => {
-  const file = await fs.readFile(filePath, 'utf8')
-  return file
-}
+export const readFile = async (filePath: string) => {
+  const file = await fs.readFile(filePath, "utf8");
+  return file;
+};
 
-const getPathStat = (p:string) => fs.stat(p)
+const getPathStat = (p: string) => fs.stat(p);
 
-export const isFile = async (filePath:string) => {
+export const isFile = async (filePath: string) => {
   try {
-    const stat = await getPathStat(filePath)
-    return stat.isFile()
+    const stat = await getPathStat(filePath);
+    return stat.isFile();
+  } catch (ex) {
+    return false;
   }
-  catch (ex) {
-    return false
-  }
-}
+};
 
-export const isFilePath = async (filePath:string, ext:string) => {
-  const is = await isFile(filePath + ext)
-  return is
-}
+export const isFilePath = async (filePath: string, ext: string) => {
+  const is = await isFile(filePath + ext);
+  return is;
+};
 
-export const isDirectory = async (dirPath:string) => {
+export const isDirectory = async (dirPath: string) => {
   try {
-    const stat = await getPathStat(dirPath)
-    return stat.isDirectory()
+    const stat = await getPathStat(dirPath);
+    return stat.isDirectory();
+  } catch (ex) {
+    return false;
   }
-  catch (ex) {
-    return false
-  }
-}
+};
 
-export const readDirectory = async (dirPath:string) => {
-  const dirContent = await fs.readdir(dirPath)
-  return dirContent
-}
+export const readDirectory = async (dirPath: string) => {
+  const dirContent = await fs.readdir(dirPath);
+  return dirContent;
+};
 
-export const isValidDirectory = async (p:string, toSkip:Array<string>): Promise<boolean> => {
-  const isDir = await isDirectory(p)
+export const isValidDirectory = async (
+  p: string,
+  toSkip: Array<string>
+): Promise<boolean> => {
+  const isDir = await isDirectory(p);
   if (!isDir) {
-    return false
+    return false;
   }
 
-  const {name} = parse(p)
-  if(!name) return false
+  const { name } = parse(p);
+  if (!name) return false;
 
-  let isValid = true
-  
-  toSkip.forEach(m => {
-    if(name.match(m)){
-      isValid = false
+  let isValid = true;
+
+  toSkip.forEach((m) => {
+    if (name.match(m)) {
+      isValid = false;
     }
-  })
-  
-  return isValid 
-}
+  });
 
-export const isReactComponent = async (file:string, p:string, extensions:Array<string>) => {
-  const { ext, name } = path.parse(p)
-  const foundExt = extensions.includes(ext)
+  return isValid;
+};
 
-  if (!foundExt || name.includes('.test')) return false
+export const isReactComponent = async (
+  file: string,
+  p: string,
+  extensions: Array<string>
+) => {
+  const { ext, name } = path.parse(p);
+  const foundExt = extensions.includes(ext);
 
-  const impReactReg = /import\s*(React|\* as React)[\w{}\s,'"]*\s*from \s*('|")react('|")(;)?/g
+  if (!foundExt || name.includes(".test")) return false;
 
-  const isContaines = file.split('\n').map(line => {
-    const match = line.match(impReactReg)
-    return (match && match.length > 0)
-  })
-  return isContaines.includes(true)
-}
+  const impReactReg =
+    /import\s*(React|\* as React)[\w{}\s,'"]*\s*from \s*('|")react('|")(;)?/g;
 
-export const isValideImport = (imp:string) => {
-  return imp.startsWith('.')
-}
+  const isContaines = file.split("\n").map((line) => {
+    const match = line.match(impReactReg);
+    return match && match.length > 0;
+  });
+  return isContaines.includes(true);
+};
 
-export const saveToJSON = async (data:Object, fileName:string) => {
-  if(!fileName || fileName === '')
-    fileName = "Ghosts"
-  await fs.writeFile(fileName + '.json', JSON.stringify(data))
-}
+export const isValideImport = (imp: string) => {
+  return imp.startsWith(".");
+};
+
+export const saveToJSON = async (data: Object, fileName: string) => {
+  if (!fileName || fileName === "") fileName = "Ghosts";
+  await fs.writeFile(fileName + ".json", JSON.stringify(data));
+};

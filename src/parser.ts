@@ -1,7 +1,7 @@
 import { parse } from "@babel/parser";
 import { File, Node } from "@babel/types";
 
-import { isValideImport } from "../helpers/fs";
+import { isValideImport } from "./helpers/fs";
 
 type specifierNode = { local: string; imported: string };
 export interface ImportNode {

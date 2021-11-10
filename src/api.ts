@@ -10,7 +10,7 @@ import {
   findFileExtension,
 } from "./helpers/fs";
 
-import { AstParser, ParseResult, Component } from "./helpers/parser";
+import { AstParser, ParseResult, Component } from "./parser";
 
 /***
  * API
