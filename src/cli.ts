@@ -3,6 +3,9 @@ import Enquirer from 'enquirer'
 import {
   saveToJSON
 } from './helpers/fs'
+
+import { version } from '../package.json'
+
 interface Option {
   option: string,
   description: string
@@ -22,7 +25,6 @@ class Cli{
     {option: '-e, --entry-point <type>', description: 'Path of entry point'},
     {option: '-r, --root-folder <type>', description: 'Path of root folder'},
   ]
-
   private program: Command
   private enq:Enquirer
 
@@ -34,16 +36,18 @@ class Cli{
       this.program.option(option, description)
     })
     
-    this.program.version("0.0.1")
+    this.program.version(version)
   }
 
   argvParsing = () => {
     this.program.parse(process.argv)
     return this.program.opts()
   }
-  
+
   showUsage = () => {
-    console.log("Ghose Component CLI, ./GhostComponent ./ ./index.js")
+    console.log(`
+      Ghose Component CLI, \n
+      ghostComponents -r ./rootProject -e ./entrypoint`)
   }
 
   exitOverride = () => {
