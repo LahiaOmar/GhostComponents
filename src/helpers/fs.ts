@@ -83,26 +83,6 @@ export const isValidDirectory = async (
   return isValid;
 };
 
-export const isReactComponent = async (
-  file: string,
-  p: string,
-  extensions: Array<string>
-) => {
-  const { ext, name } = path.parse(p);
-  const foundExt = extensions.includes(ext);
-
-  if (!foundExt || name.includes(".test")) return false;
-
-  const impReactReg =
-    /import\s*(React|\* as React)[\w{}\s,'"]*\s*from \s*('|")react('|")(;)?/g;
-
-  const isContaines = file.split("\n").map((line) => {
-    const match = line.match(impReactReg);
-    return match && match.length > 0;
-  });
-  return isContaines.includes(true);
-};
-
 export const isValideImport = (imp: string) => {
   return imp.startsWith(".");
 };

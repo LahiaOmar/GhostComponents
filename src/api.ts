@@ -1,7 +1,6 @@
 import {
   isFile,
   isValidDirectory,
-  isReactComponent,
   isDirectory,
   readFile,
   readDirectory,
@@ -67,18 +66,12 @@ export class Api {
     const isFilePath = await isFile(currentPath);
     const isDirPath = await isValidDirectory(currentPath, this.skip);
 
-    if (isFilePath) {
+    if (isFilePath && this.validFileExt(currentPath)) {
       const file = await readFile(currentPath);
-      const isComponent = await isReactComponent(
-        file,
-        currentPath,
-        this.extensions
-      );
 
-      if (isComponent) {
-        const fileAST = this.astParser.parse(file);
+      const fileAST = this.astParser.parse(file);
+      if (fileAST.components.length > 0)
         this.allComponents.set(currentPath, fileAST);
-      }
     } else if (isDirPath) {
       let files = await readDirectory(currentPath);
 
@@ -281,5 +274,16 @@ export class Api {
     }
 
     return main;
+  };
+
+  /**
+   * return if a file have a valide extension.
+   * @param {string} path - file path
+   * @returns {boolean}
+   */
+  validFileExt = (path: string): boolean => {
+    const { ext } = parse(path);
+
+    return this.extensions.some((extension) => extension === ext);
   };
 }
