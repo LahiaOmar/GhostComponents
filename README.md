@@ -3,7 +3,7 @@
 - GhostComponents it's NodeJS CLI that can help you to find all React Components non-used in your app Tree Components.
 
 - CLI Actual Status :
-  - Not publish yet.
+  - Not published yet.
   - Working on Errors handling, and Docs.
 
 ## How to use it.
