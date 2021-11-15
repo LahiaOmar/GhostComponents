@@ -34,6 +34,8 @@ class Cli {
     });
 
     this.program.version(version);
+    this.program.showHelpAfterError("add --help for additional informations");
+    this.program.showSuggestionAfterError();
   }
 
   argvParsing = () => {
