@@ -33,7 +33,9 @@ class Cli {
       this.program.option(option, description);
     });
 
-    this.program.version(version);
+    this.program.name("ghostComponents").usage("<options>");
+
+    this.program.version(version, "-v, --version", "show the current version");
     this.program.showHelpAfterError("add --help for additional informations");
     this.program.showSuggestionAfterError();
   }
@@ -44,9 +46,11 @@ class Cli {
   };
 
   showUsage = () => {
-    console.log(`
-      Ghose Component CLI, \n
-      ghostComponents -r ./rootProject -e ./entrypoint`);
+    console.log(
+      "Ghose Component CLI, \n\n" +
+        "To search for non-used components, -e and -r are required : \n " +
+        "$ npx ghostComponents -r ./path-project-root -e ./entrypoint-app"
+    );
   };
 
   exitOverride = () => {
