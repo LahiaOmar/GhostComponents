@@ -2,6 +2,7 @@ import { Command } from "commander";
 import Enquirer from "enquirer";
 import Api from "./api";
 import { version } from "../package.json";
+import chalk from "chalk";
 
 interface Option {
   option: string;
@@ -42,7 +43,7 @@ class Cli {
   }
 
   start = async (rootFolder: string, entryPoint: string) => {
-    console.log("\n👻 Ghost chasing begins ");
+    console.log(chalk.green("\n👻 Ghost chasing begins\n"));
     const api = new Api(rootFolder, entryPoint);
     const { ghosts, totalComponents } = await api.searchGhost();
     this.ghosts = ghosts;
@@ -64,15 +65,21 @@ class Cli {
 
   showResult = () => {
     console.log(
-      `You created : ${this.totalComponents} components\n\n` +
-        `You're using ${
-          this.totalComponents - this.ghosts.length
-        } components\n\n` +
-        `The number of Ghosts are : ${this.ghosts.length}\n`
+      chalk.blue(`You created : ${this.totalComponents} components\n\n`) +
+        chalk.greenBright(
+          `You're using ${
+            this.totalComponents - this.ghosts.length
+          } components\n\n`
+        ) +
+        chalk.red(`The number of Ghosts are : ${this.ghosts.length}\n`)
     );
 
     this.ghosts.forEach((ghost) => {
-      console.log(`\t<${ghost.name} /> -> ${ghost.path}`);
+      console.log(
+        chalk.red(`\t<${ghost.name} />`) +
+          " -> " +
+          chalk.blueBright(`${ghost.path}`)
+      );
     });
     console.log("\n");
   };
