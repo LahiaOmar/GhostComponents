@@ -22,7 +22,7 @@ export default class Api {
   private allComponents: Map<string, ParseResult> = new Map();
   private usedComponents: { name: string; path: string }[] = [];
   private ghosts: { name: string; path: string }[] = [];
-  extensions: Array<string> = [".js", ".ts", ".tsx", ".node"];
+  extensions: Array<string> = [".js", ".ts", ".tsx", ".node", ".jsx"];
   private astParser: AstParser;
 
   /**

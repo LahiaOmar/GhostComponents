@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 import path from "path";
-import { AstParser } from "../parser";
 
 export const findFileExtension = async (
   path: string,
