@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import Enquirer from "enquirer";
 import Api from "./api";
-import { version } from "../package.json";
+import { version, name } from "../package.json";
 import chalk from "chalk";
 
 interface Option {
@@ -59,7 +59,7 @@ class Cli {
     console.log(
       "Ghose Component CLI, \n\n" +
         "To search for non-used components, -e and -r are required : \n " +
-        "$ npx ghostComponents -r ./path-project-root -e ./entrypoint-app"
+        `$ npx ${name} -r ./path-project-root -e ./entrypoint-app`
     );
   };
 
