@@ -86,8 +86,3 @@ export const isValidDirectory = async (
 export const isValideImport = (imp: string) => {
   return imp.startsWith(".");
 };
-
-export const saveToJSON = async (data: Object, fileName: string) => {
-  if (!fileName || fileName === "") fileName = "Ghosts";
-  await fs.writeFile(fileName + ".json", JSON.stringify(data));
-};

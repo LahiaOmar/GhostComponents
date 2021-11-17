@@ -15,7 +15,7 @@ import { AstParser, ParseResult, Component } from "./parser";
  * API
  *
  */
-export class Api {
+export default class Api {
   private rootFolder: string;
   private entryPoint: string;
   private skip: Array<string>;
@@ -30,13 +30,12 @@ export class Api {
    * @param {string} rootFolder - Path to the root folder
    * @param {string} entryPoint  - Path to the entry point
    */
-  constructor(rootFolder: string, entryPoint: string, skip: Array<string>) {
+  constructor(rootFolder: string, entryPoint: string) {
     this.rootFolder = rootFolder;
     this.entryPoint = entryPoint;
     this.astParser = new AstParser();
 
     this.skip = ["node_modules", "test", "tests", "styles"];
-    this.skip = this.skip.concat(skip);
     this.resolvePath();
   }
 
@@ -55,7 +54,10 @@ export class Api {
 
     this.findUnusedComponents();
 
-    return this.ghosts;
+    return {
+      ghosts: this.ghosts,
+      totalComponents: this.allComponents.size,
+    };
   }
 
   /**

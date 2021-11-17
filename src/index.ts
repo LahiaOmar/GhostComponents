@@ -1,5 +1,5 @@
 import Cli from "./cli";
-import { Api } from "./api";
+import Api from "./api";
 
 const cli = new Cli();
 
@@ -13,13 +13,9 @@ if (usage) {
 if (rootFolder && entryPoint) {
   (async () => {
     try {
-      const skip = await cli.askForSkipFiles();
+      await cli.start(rootFolder, entryPoint);
 
-      const api = new Api(rootFolder, entryPoint, skip);
-      const ghost = await api.searchGhost();
-      console.log("Ghost founded", ghost);
-
-      cli.askToSaveResult(ghost);
+      cli.showResult();
     } catch (ex: any) {
       console.log("there is some problems : ", ex.message);
     }

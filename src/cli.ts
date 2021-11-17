@@ -1,7 +1,6 @@
 import { Command } from "commander";
 import Enquirer from "enquirer";
-import { saveToJSON } from "./helpers/fs";
-
+import Api from "./api";
 import { version } from "../package.json";
 
 interface Option {
@@ -24,6 +23,8 @@ class Cli {
   ];
   private program: Command;
   private enq: Enquirer;
+  private ghosts: { name: string; path: string }[] = [];
+  private totalComponents: number = 0;
 
   constructor() {
     this.program = new Command();
@@ -40,6 +41,14 @@ class Cli {
     this.program.showSuggestionAfterError();
   }
 
+  start = async (rootFolder: string, entryPoint: string) => {
+    console.log("\n👻 Ghost chasing begins ");
+    const api = new Api(rootFolder, entryPoint);
+    const { ghosts, totalComponents } = await api.searchGhost();
+    this.ghosts = ghosts;
+    this.totalComponents = totalComponents;
+  };
+
   argvParsing = () => {
     this.program.parse(process.argv);
     return this.program.opts();
@@ -51,6 +60,21 @@ class Cli {
         "To search for non-used components, -e and -r are required : \n " +
         "$ npx ghostComponents -r ./path-project-root -e ./entrypoint-app"
     );
+  };
+
+  showResult = () => {
+    console.log(
+      `You created : ${this.totalComponents} components\n\n` +
+        `You're using ${
+          this.totalComponents - this.ghosts.length
+        } components\n\n` +
+        `The number of Ghosts are : ${this.ghosts.length}\n`
+    );
+
+    this.ghosts.forEach((ghost) => {
+      console.log(`\t<${ghost.name} /> -> ${ghost.path}`);
+    });
+    console.log("\n");
   };
 
   exitOverride = () => {
@@ -78,15 +102,15 @@ class Cli {
     return toSkipPatterns;
   };
 
-  askToSaveResult = async (data: Object) => {
+  askToSaveResult = async () => {
     const response: any = await this.enq.prompt({
       type: "select",
       name: "save",
-      message: "to save the result, choose a file format, or chose not save",
-      choices: ["JSON", "Not save"],
+      message: "You can save the result in a JSON file !?",
+      choices: ["Save", "Not Save"],
     });
 
-    if (response.save === "JSON") {
+    if (response.save === "Save") {
       const question = {
         type: "input",
         name: "fileName",
@@ -95,20 +119,11 @@ class Cli {
 
       const fileName: any = await this.enq.prompt(question);
 
-      this.saveResult(SaveOptions.JSON, data, fileName.fileName);
+      this.saveResult(SaveOptions.JSON, fileName.fileName);
     }
   };
 
-  saveResult = async (type: SaveOptions, data: Object, fileName: string) => {
-    switch (type) {
-      case SaveOptions.JSON:
-        await saveToJSON(data, fileName);
-        break;
-
-      default:
-        throw new Error("Wrong type");
-    }
-  };
+  private saveResult = async (type: SaveOptions, fileName: string) => {};
 }
 
 export default Cli;
