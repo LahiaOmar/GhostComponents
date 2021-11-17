@@ -164,7 +164,7 @@ export default class Api {
 
         if (!indexPath && !packagePath) {
           throw new Error(
-            "there no index.js or package.json to resolve the component"
+            `there no index.js or package.json in this folder ${nextPath}`
           );
         }
 
