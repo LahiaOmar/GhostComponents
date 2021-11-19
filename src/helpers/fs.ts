@@ -67,14 +67,12 @@ export const isValidDirectory = async (
   if (!isDir) {
     return false;
   }
-
   const { name } = parse(p);
   if (!name) return false;
-
   let isValid = true;
 
   toSkip.forEach((m) => {
-    if (name.match(m)) {
+    if (name == m) {
       isValid = false;
     }
   });
