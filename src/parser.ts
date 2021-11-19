@@ -360,6 +360,11 @@ export class AstParser {
       );
       if (found) isValid = true;
     });
+
+    this.components.forEach(({ info }) => {
+      if (info.name === name) isValid = true;
+    });
+
     return isValid;
   };
 }
