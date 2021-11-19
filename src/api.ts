@@ -35,7 +35,7 @@ export default class Api {
     this.entryPoint = entryPoint;
     this.astParser = new AstParser();
 
-    this.skip = ["node_modules", "test", "tests", "styles"];
+    this.skip = ["node_modules", "test", "tests", "styles", ".git", ".vscode"];
     this.resolvePath();
   }
 
@@ -54,9 +54,13 @@ export default class Api {
 
     this.findUnusedComponents();
 
+    let totalComponents = 0;
+    this.allComponents.forEach((cmp) => {
+      totalComponents += cmp.components.length;
+    });
     return {
       ghosts: this.ghosts,
-      totalComponents: this.allComponents.size,
+      totalComponents: totalComponents,
     };
   }
 
@@ -93,8 +97,15 @@ export default class Api {
     filePath: string,
     localComponentName: string | null
   ) {
+    // prevent infinite loop. (A use B, and B use A)
+    const isVisitedFile = this.usedComponents.find(
+      (file) => file.path === filePath
+    );
+    if (isVisitedFile) return;
+
     const currentCmp = this.allComponents.get(filePath);
     if (!currentCmp) return;
+
     const { importStatements, exportStatements, components } = currentCmp;
     let fileComponents = [...components];
 
@@ -106,19 +117,23 @@ export default class Api {
 
     const nextComponents: { name: string; path: string }[] = [];
 
-    //
+    //find local used components, and find the next external components.
     const filterNextComponents = (
       current: Component,
       components: Component[]
     ) => {
       components = components.filter(({ info }) => {
-        info.name === current.info.name;
+        return info.name !== current.info.name;
       });
 
       for (const tag of current.tags) {
         const foundNext = components.findIndex(({ info }) => info.name === tag);
         const nextComponent = components.find(({ info }) => info.name === tag);
-        if (foundNext > 0 && nextComponent) {
+        if (foundNext >= 0 && nextComponent) {
+          this.usedComponents.push({
+            name: nextComponent.info.name,
+            path: filePath,
+          });
           components = components.filter((_, index) => index !== foundNext);
           filterNextComponents(nextComponent, components);
         } else {
@@ -143,6 +158,7 @@ export default class Api {
         name: rootComponent.info.name,
         path: filePath,
       });
+
       filterNextComponents(rootComponent, fileComponents);
     }
     for (let { path, name } of nextComponents) {
