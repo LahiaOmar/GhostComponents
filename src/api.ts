@@ -233,17 +233,9 @@ export default class Api {
 
     const { exportStatements, importStatements } = astParser.parse(file);
 
-    let foundExport = false;
-
-    exportStatements.forEach(({ local, exported }) => {
-      if (local !== componentName && exported === componentName) {
-        componentName = local;
-        foundExport = true;
-      }
-      if (local === componentName && exported === componentName) {
-        foundExport = true;
-      }
-    });
+    const foundExport = exportStatements.find(({ local, exported }) =>
+      [local, exported].includes(componentName)
+    );
 
     if (!foundExport) {
       throw new Error(
