@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, OptionValues } from "commander";
 import Enquirer from "enquirer";
 import Api from "./api";
 import { version, name } from "../package.json";
@@ -26,6 +26,7 @@ class Cli {
   private enq: Enquirer;
   private ghosts: { name: string; path: string }[] = [];
   private totalComponents: number = 0;
+  private options: OptionValues = {};
 
   constructor() {
     this.program = new Command();
@@ -52,7 +53,12 @@ class Cli {
 
   argvParsing = () => {
     this.program.parse(process.argv);
-    return this.program.opts();
+    this.options = this.program.opts();
+
+    if (!Object.keys(this.options).length) {
+      this.program.help();
+    }
+    return this.options;
   };
 
   showUsage = () => {
