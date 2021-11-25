@@ -13,7 +13,12 @@ export const findFileExtension = async (
       return foundExt;
     }
   }
-  // TODO: throw Error : we couldn't find the extension of this file. {path}
+
+  throw new Error(
+    `This file doesn't have a valide extension: ${path}` +
+      `We support this list of extensions: ${extensions.toString()}` +
+      `\nif you use a valid extension for React project we don't support, please open an issus there: https://github.com/LahiaOmar/GhostComponents/issues`
+  );
 };
 
 export const parse = (p: string) => {
@@ -25,8 +30,15 @@ export const join = (...p: string[]) => {
 };
 
 export const readFile = async (filePath: string) => {
-  const file = await fs.readFile(filePath, "utf8");
-  return file;
+  try {
+    const file = await fs.readFile(filePath, "utf8");
+    return file;
+  } catch (ex: any) {
+    throw new Error(
+      `ERROR_MESSAGE: ${ex.message}` +
+        `while reading this file: ${filePath}\ncheck the content of this file`
+    );
+  }
 };
 
 const getPathStat = (p: string) => fs.stat(p);
@@ -55,8 +67,15 @@ export const isDirectory = async (dirPath: string) => {
 };
 
 export const readDirectory = async (dirPath: string) => {
-  const dirContent = await fs.readdir(dirPath);
-  return dirContent;
+  try {
+    const dirContent = await fs.readdir(dirPath);
+    return dirContent;
+  } catch (ex: any) {
+    throw new Error(
+      `ERROR_MESSAGE: ${ex.message}` +
+        `Error while reading the content of this directory: ${dirPath}`
+    );
+  }
 };
 
 export const isValidDirectory = async (

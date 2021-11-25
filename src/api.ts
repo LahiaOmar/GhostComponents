@@ -8,7 +8,6 @@ import {
   parse,
   findFileExtension,
 } from "./helpers/fs";
-
 import { AstParser, ParseResult, Component } from "./parser";
 
 /***
@@ -178,12 +177,6 @@ export default class Api {
           restOfPath = packagePath;
         }
 
-        if (!indexPath && !packagePath) {
-          throw new Error(
-            `there no index.js or package.json in this folder ${nextPath}`
-          );
-        }
-
         nextPath = join(nextPath, restOfPath);
       } else {
         const endWithExt = this.extensions
@@ -253,7 +246,9 @@ export default class Api {
     });
 
     if (!foundExport) {
-      return null;
+      throw new Error(
+        `We can't find the component ${componentName} exported from ${dirPath}`
+      );
     }
     let componentPath = "";
 
@@ -264,6 +259,11 @@ export default class Api {
       });
     });
 
+    if (componentPath === "") {
+      throw new Error(
+        `we can't find the exported component ${componentName} in you imports, ${dirPath}`
+      );
+    }
     // and map it to his import statement.
     return componentPath + fileExt;
   };
