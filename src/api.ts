@@ -261,7 +261,7 @@ export default class Api {
 
     if (componentPath === "") {
       throw new Error(
-        `we can't find the exported component ${componentName} in you imports, ${dirPath}`
+        `we can't find the exported component ${componentName} in your imports, ${dirPath}`
       );
     }
     // and map it to his import statement.
@@ -287,7 +287,7 @@ export default class Api {
 
     if (name !== componentName) {
       throw new Error(
-        `name : ${name} in the package.json don't match with component name ${componentName}`
+        `The name : ${name} in the package.json don't match with the component name: ${componentName}`
       );
     }
 

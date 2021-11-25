@@ -15,9 +15,9 @@ export const findFileExtension = async (
   }
 
   throw new Error(
-    `This file doesn't have a valide extension: ${path}` +
-      `We support this list of extensions: ${extensions.toString()}` +
-      `\nif you use a valid extension for React project we don't support, please open an issus there: https://github.com/LahiaOmar/GhostComponents/issues`
+    `This file doesn't have a valid extension: ${path}` +
+      `\nWe support this list of extensions: ${extensions.toString()}` +
+      `\nif you use a valid extension for React project we don't support, please open an issue there: https://github.com/LahiaOmar/GhostComponents/issues`
   );
 };
 
@@ -36,7 +36,8 @@ export const readFile = async (filePath: string) => {
   } catch (ex: any) {
     throw new Error(
       `ERROR_MESSAGE: ${ex.message}` +
-        `while reading this file: ${filePath}\ncheck the content of this file`
+        `While reading this file: ${filePath}` +
+        `\nCheck the content of this file`
     );
   }
 };
