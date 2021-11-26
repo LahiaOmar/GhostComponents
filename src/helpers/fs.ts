@@ -84,20 +84,14 @@ export const isValidDirectory = async (
   toSkip: Array<string>
 ): Promise<boolean> => {
   const isDir = await isDirectory(p);
-  if (!isDir) {
+  const { name } = parse(p);
+
+  if (!isDir || !name) {
     return false;
   }
-  const { name } = parse(p);
-  if (!name) return false;
-  let isValid = true;
 
-  toSkip.forEach((m) => {
-    if (name == m) {
-      isValid = false;
-    }
-  });
-
-  return isValid;
+  const foundAMatch = toSkip.find((m) => name === m);
+  return !foundAMatch;
 };
 
 export const isValideImport = (imp: string) => {
