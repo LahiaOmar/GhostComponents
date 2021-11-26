@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon",
-    "test": "jest --watch --testTimeout=10000"
+    "test": "jest --watchAll"
   },
   "keywords": [],
   "author": "",
