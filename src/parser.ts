@@ -36,6 +36,9 @@ export interface ExportNode {
   };
 }
 
+/**
+ * Ast Parser Class
+ */
 export class AstParser {
   private ast: File | null = null;
   private fileContent: string | null = null;
@@ -49,6 +52,9 @@ export class AstParser {
     this.initFilters();
   }
 
+  /**
+   * Init the main filter, filter are how we know which ast node we need to use
+   */
   initFilters = () => {
     this.filters = [
       this.importNode,
@@ -60,6 +66,9 @@ export class AstParser {
     ];
   };
 
+  /**
+   * Clear all propertys.
+   */
   clearAll = () => {
     this.components.length = 0;
     this._components.length = 0;
@@ -67,6 +76,12 @@ export class AstParser {
     this.exports.length = 0;
   };
 
+  /**
+   * Parsing a file content to AST.
+   * @param {string} content
+   * @param {string} options
+   * @returns {object}
+   */
   parse = (content: string, options?: {}) => {
     this.clearAll();
     this.fileContent = content;
@@ -82,6 +97,10 @@ export class AstParser {
     };
   };
 
+  /**
+   * the main parse function
+   * @param options
+   */
   private parseContent(options?: {}) {
     options = {
       sourceType: "unambiguous",
@@ -94,6 +113,11 @@ export class AstParser {
     }
   }
 
+  /**
+   * Function to travers the AST.
+   * @param node - Ast node
+   * @param costumFilter - costum filter
+   */
   traverse(node: any, costumFilter?: (filterNode: any) => void) {
     if (Array.isArray(node)) {
       node.forEach((nextNode) => this.traverse(nextNode, costumFilter));
@@ -114,6 +138,9 @@ export class AstParser {
     }
   }
 
+  /**
+   * Start looking for JSX tags for every COMPONENT_AST_NODE.
+   */
   private resolveTags = () => {
     this._components.forEach(({ info, node }) => {
       const nextComponent: Component = { info, tags: [] };
@@ -122,6 +149,10 @@ export class AstParser {
     });
   };
 
+  /**
+   * Filter for a import statement.
+   * @param node
+   */
   private importNode = (node: Node) => {
     if (node.type === "ImportDeclaration") {
       const { source, specifiers } = node;
@@ -147,6 +178,10 @@ export class AstParser {
     }
   };
 
+  /**
+   * Filter for a arrow function component.
+   * @param node
+   */
   private arrowComponent = (node: Node) => {
     if (node.type === "VariableDeclaration") {
       const { declarations } = node;
@@ -186,6 +221,10 @@ export class AstParser {
     }
   };
 
+  /**
+   * Filter for a Class component.
+   * @param node
+   */
   private classComponent = (node: Node) => {
     if (node.type === "ClassDeclaration") {
       const { superClass, loc, id } = node;
@@ -224,6 +263,10 @@ export class AstParser {
     }
   };
 
+  /**
+   * Filter for a function component.
+   * @param node
+   */
   private funComponent = (node: Node) => {
     if (node.type === "FunctionDeclaration") {
       const { id, loc, body } = node;
@@ -252,6 +295,10 @@ export class AstParser {
     }
   };
 
+  /**
+   * Filter for a JSX tag.
+   * @param node
+   */
   private JSXTagNode = (node: Node) => {
     if (node.type === "JSXOpeningElement") {
       const { name } = node;
@@ -278,6 +325,10 @@ export class AstParser {
     }
   };
 
+  /**
+   * Filter for ReactDOM.render function.
+   * @param node
+   */
   private reactDOMNode = (node: Node) => {
     if (node.type === "ExpressionStatement") {
       const { expression, loc } = node;
@@ -301,6 +352,10 @@ export class AstParser {
     }
   };
 
+  /**
+   * Filter for a export statement.
+   * @param node
+   */
   private exportNode = (node: Node) => {
     if (node.type === "ExportDefaultDeclaration") {
       const { loc, declaration } = node;
@@ -344,14 +399,20 @@ export class AstParser {
     }
   };
 
+  /**
+   * Test if the current ast_node is a object.
+   * @param node
+   * @returns {boolean}
+   */
   private isObjectNode = (node: Node) => {
     return node && typeof node === "object" && node.type;
   };
 
-  private isValideImport = (path: string) => {
-    return path.startsWith(".");
-  };
-
+  /**
+   * Test if JSX tag is a external or local component.
+   * @param name
+   * @returns {boolean}
+   */
   private isValidJSX = (name: string) => {
     let isValid = false;
     this.imports.forEach(({ specifiers }) => {

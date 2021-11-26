@@ -1,6 +1,12 @@
 import fs from "fs/promises";
 import path from "path";
 
+/**
+ * find the extension of a file.
+ * @param {string} path - file path
+ * @param extensions - arrays of valid extensions
+ * @returns {string} - the file extension.
+ */
 export const findFileExtension = async (
   path: string,
   extensions: Array<string>
@@ -21,14 +27,29 @@ export const findFileExtension = async (
   );
 };
 
+/**
+ * parse a path string ( base on path.pasre )
+ * @param {string} p - path
+ * @returns {object}
+ */
 export const parse = (p: string) => {
   return path.parse(p);
 };
 
+/**
+ * join all arguments paths
+ * @param {string} p - object of all arguments passed.
+ * @returns
+ */
 export const join = (...p: string[]) => {
   return path.join(...p);
 };
 
+/**
+ * read a file
+ * @param {string} - filePath - file path
+ * @returns {string} - file content
+ */
 export const readFile = async (filePath: string) => {
   try {
     const file = await fs.readFile(filePath, "utf8");
@@ -42,8 +63,18 @@ export const readFile = async (filePath: string) => {
   }
 };
 
+/**
+ *  get stat of a path
+ * @param {string} p - path
+ * @returns
+ */
 const getPathStat = (p: string) => fs.stat(p);
 
+/**
+ * test if a path is a file path
+ * @param {string} filePath - path
+ * @returns {boolean} - true if is a file path, false otherwise.
+ */
 export const isFile = async (filePath: string) => {
   try {
     const stat = await getPathStat(filePath);
@@ -53,11 +84,22 @@ export const isFile = async (filePath: string) => {
   }
 };
 
+/**
+ * test if a current path concat with a extension
+ * @param {string} filePath
+ * @param {string} ext
+ * @returns {boolean}
+ */
 export const isFilePath = async (filePath: string, ext: string) => {
   const is = await isFile(filePath + ext);
   return is;
 };
 
+/**
+ * Test if a path is a directory path.
+ * @param {string} dirPath
+ * @returns {boolean}
+ */
 export const isDirectory = async (dirPath: string) => {
   try {
     const stat = await getPathStat(dirPath);
@@ -67,6 +109,11 @@ export const isDirectory = async (dirPath: string) => {
   }
 };
 
+/**
+ * read the content of a directory
+ * @param {string} dirPath
+ * @returns {boolean}
+ */
 export const readDirectory = async (dirPath: string) => {
   try {
     const dirContent = await fs.readdir(dirPath);
@@ -79,6 +126,12 @@ export const readDirectory = async (dirPath: string) => {
   }
 };
 
+/**
+ * test we should skip a directory
+ * @param {string} p
+ * @param {Array.<string>} toSkip - array of folders name to skip
+ * @returns {boolean}
+ */
 export const isValidDirectory = async (
   p: string,
   toSkip: Array<string>
@@ -94,6 +147,11 @@ export const isValidDirectory = async (
   return !foundAMatch;
 };
 
+/**
+ * test if a import statement is valid. ( start with "." for external components)
+ * @param {string} imp - import path
+ * @returns {boolean}
+ */
 export const isValideImport = (imp: string) => {
   return imp.startsWith(".");
 };

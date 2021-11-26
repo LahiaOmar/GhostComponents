@@ -1,5 +1,4 @@
 import Cli from "./cli";
-import Api from "./api";
 
 const cli = new Cli();
 

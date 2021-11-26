@@ -25,7 +25,7 @@ export default class Api {
   private astParser: AstParser;
 
   /**
-   *
+   * API constructor
    * @param {string} rootFolder - Path to the root folder
    * @param {string} entryPoint  - Path to the entry point
    */
@@ -38,6 +38,9 @@ export default class Api {
     this.resolvePath();
   }
 
+  /**
+   * Join the root folder and entry point path with the path of current process.
+   */
   private resolvePath() {
     this.rootFolder = join(process.cwd(), this.rootFolder);
     this.entryPoint = join(process.cwd(), this.entryPoint);
@@ -88,7 +91,7 @@ export default class Api {
   }
 
   /**
-   * Find the used components if the app.
+   * Find the used components.
    * @param {string} filePath - path of the component.
    * @param {string} localComponentName
    */
@@ -167,6 +170,7 @@ export default class Api {
       const isPathDir = await isDirectory(nextPath);
 
       if (isPathDir) {
+        // resolving the component path from index.js or package.json
         const indexPath = await this.resolveIndexFile(nextPath, name);
         const packagePath = await this.resolvePackageJson(nextPath, name);
         let restOfPath = "";
@@ -213,11 +217,11 @@ export default class Api {
   }
 
   /**
-   *
+   * Resolve the component path from MODULE/index.(js, ...)
    * @param {string} dirPath - directory path
    * @param {string} componentName - component name
    * @param {string[]} extensions -
-   * @returns
+   * @returns {string | null}
    */
   private resolveIndexFile = async (
     dirPath: string,
@@ -260,7 +264,7 @@ export default class Api {
     return componentPath + fileExt;
   };
   /**
-   *
+   * Resolve the component path from MODULE/package.json
    * @param {string} dirPath - directory path
    * @param {sstring} componentName - component name
    * @returns

@@ -9,10 +9,6 @@ interface Option {
   description: string;
 }
 
-export enum SaveOptions {
-  JSON = "JSON",
-}
-
 /**
  * CLI
  */
@@ -28,6 +24,9 @@ class Cli {
   private totalComponents: number = 0;
   private options: OptionValues = {};
 
+  /**
+   * Constructor of CLI
+   */
   constructor() {
     this.program = new Command();
     this.enq = new Enquirer();
@@ -43,6 +42,11 @@ class Cli {
     this.program.showSuggestionAfterError();
   }
 
+  /**
+   * start searching for GHOSTS CLI
+   * @param {string} rootFolder
+   * @param {string} entryPoint
+   */
   start = async (rootFolder: string, entryPoint: string) => {
     console.log(chalk.green("\n👻 Ghost chasing begins\n"));
     const api = new Api(rootFolder, entryPoint);
@@ -51,6 +55,10 @@ class Cli {
     this.totalComponents = totalComponents;
   };
 
+  /**
+   * parsing cli arguments
+   * @returns {Option[]} - array of arguments
+   */
   argvParsing = () => {
     this.program.parse(process.argv);
     this.options = this.program.opts();
@@ -61,6 +69,9 @@ class Cli {
     return this.options;
   };
 
+  /**
+   * Show how to use the CLI
+   */
   showUsage = () => {
     console.log(
       "Ghose Component CLI, \n\n" +
@@ -69,6 +80,9 @@ class Cli {
     );
   };
 
+  /**
+   * Show the result
+   */
   showResult = () => {
     console.log(
       chalk.blue(`You created : ${this.totalComponents} components\n\n`) +
@@ -93,50 +107,6 @@ class Cli {
   exitOverride = () => {
     this.program.exitOverride();
   };
-
-  askForSkipFiles = async (): Promise<Array<string>> => {
-    let toSkipPatterns: Array<string> = [];
-
-    const skipQuestion = {
-      type: "input",
-      name: "skip",
-      message:
-        "Skip folder/file, enter a list of names or patterns separated by a space",
-    };
-
-    const skiped: any = await this.enq.prompt(skipQuestion);
-
-    if (skiped.skip != "") {
-      toSkipPatterns = skiped.skip.split(" ").map((s: any) => {
-        return s.replace(/"/g, " ");
-      });
-    }
-
-    return toSkipPatterns;
-  };
-
-  askToSaveResult = async () => {
-    const response: any = await this.enq.prompt({
-      type: "select",
-      name: "save",
-      message: "You can save the result in a JSON file !?",
-      choices: ["Save", "Not Save"],
-    });
-
-    if (response.save === "Save") {
-      const question = {
-        type: "input",
-        name: "fileName",
-        message: "chose a file name, (default one is Ghosts.json)",
-      };
-
-      const fileName: any = await this.enq.prompt(question);
-
-      this.saveResult(SaveOptions.JSON, fileName.fileName);
-    }
-  };
-
-  private saveResult = async (type: SaveOptions, fileName: string) => {};
 }
 
 export default Cli;
