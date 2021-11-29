@@ -9,5 +9,5 @@ module.exports = {
   "transform": {
     "^.+\\.(ts|tsx)$": "ts-jest"
   },
-  "testPathIgnorePatterns": ['mock', 'build']
+  "testPathIgnorePatterns": ['mock', 'dist']
 }

@@ -1,15 +1,23 @@
 {
   "name": "ghostcomponents",
   "version": "1.0.0",
-  "description": "",
-  "main": "src/index.js",
+  "description": "CLI that can help you to find unused components in your ReactJS project",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "dev": "nodemon",
-    "test": "jest"
+    "test": "jest",
+    "build": "rm -rf ./dist && tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "bin": {
+    "ghostcomponents": "dist/src/index.js"
+  },
   "devDependencies": {
     "@babel/core": "^7.15.5",
     "@babel/parser": "^7.15.7",
