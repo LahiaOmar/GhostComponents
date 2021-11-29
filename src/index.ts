@@ -2,17 +2,18 @@
 
 import Cli from "./cli";
 
-const cli = new Cli();
+(async () => {
+  const cli = new Cli();
+  await cli.initCLI();
 
-const { usage, rootFolder, entryPoint } = cli.argvParsing();
+  const { usage, rootFolder, entryPoint } = cli.argvParsing();
 
-if (usage) {
-  cli.showUsage();
-  process.exit(0);
-}
+  if (usage) {
+    cli.showUsage();
+    process.exit(0);
+  }
 
-if (rootFolder && entryPoint) {
-  (async () => {
+  if (rootFolder && entryPoint) {
     try {
       await cli.start(rootFolder, entryPoint);
 
@@ -20,5 +21,5 @@ if (rootFolder && entryPoint) {
     } catch (ex: any) {
       console.log("there is some problems : ", ex.message);
     }
-  })();
-}
+  }
+})();

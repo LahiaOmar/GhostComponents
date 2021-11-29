@@ -3,7 +3,7 @@ import Enquirer from "enquirer";
 import Api from "./api";
 import { version, name } from "../package.json";
 import chalk from "chalk";
-
+import { asciiArt } from "./helpers/ascii-art";
 interface Option {
   option: string;
   description: string;
@@ -34,13 +34,19 @@ class Cli {
     this.CLIOptions.forEach(({ option, description }) => {
       this.program.option(option, description);
     });
+  }
 
-    this.program.name("ghostComponents").usage("<options>");
+  /**
+   * init CLI
+   */
+  initCLI = async () => {
+    const name = await asciiArt("GhostComponents");
 
     this.program.version(version, "-v, --version", "show the current version");
     this.program.showHelpAfterError("add --help for additional informations");
     this.program.showSuggestionAfterError();
-  }
+    this.program.name("\n" + name);
+  };
 
   /**
    * start searching for GHOSTS CLI
@@ -48,7 +54,6 @@ class Cli {
    * @param {string} entryPoint
    */
   start = async (rootFolder: string, entryPoint: string) => {
-    console.log(chalk.green("\n👻 Ghost chasing begins\n"));
     const api = new Api(rootFolder, entryPoint);
     const { ghosts, totalComponents } = await api.searchGhost();
     this.ghosts = ghosts;
@@ -74,9 +79,10 @@ class Cli {
    */
   showUsage = () => {
     console.log(
-      "Ghose Component CLI, \n\n" +
+      this.program.name() +
+        "\n\n" +
         "To search for non-used components, -e and -r are required : \n " +
-        `$ npx ${name} -r ./path-project-root -e ./entrypoint-app`
+        `foo@bar:~$ ghostcomponents -r ./PATH_PROJECT_ROOT -e ./PATH_ENTRYPOINT_APP`
     );
   };
 
