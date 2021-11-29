@@ -90,6 +90,7 @@ class Cli {
    * Show the result
    */
   showResult = () => {
+    console.log(this.program.name());
     console.log(
       chalk.blue(`You created : ${this.totalComponents} components\n\n`) +
         chalk.greenBright(
