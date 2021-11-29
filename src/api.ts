@@ -1,6 +1,5 @@
 import {
   isFile,
-  isValidDirectory,
   isDirectory,
   readFile,
   readDirectory,
@@ -71,10 +70,10 @@ export default class Api {
    * @param {string} currentPath - current path, the function start with the root folder of the app.
    */
   private async findAllComponents(currentPath: string) {
-    const isFilePath = await isFile(currentPath);
-    const isDirPath = await isValidDirectory(currentPath, this.skip);
+    const isFilePath = await this.isValidFile(currentPath);
+    const isDirPath = await this.isValidDirectory(currentPath);
 
-    if (isFilePath && this.validFileExt(currentPath)) {
+    if (isFilePath) {
       const file = await readFile(currentPath);
 
       const fileAST = this.astParser.parse(file);
@@ -295,9 +294,36 @@ export default class Api {
    * @param {string} path - file path
    * @returns {boolean}
    */
-  validFileExt = (path: string): boolean => {
+  private validFileExt = (path: string): boolean => {
     const { ext } = parse(path);
 
     return this.extensions.some((extension) => extension === ext);
+  };
+
+  /**
+   * Test if a valide file to read.
+   * @param filePath
+   */
+  private isValidFile = async (filePath: string) => {
+    const file = await isFile(filePath);
+    const { name, ext } = parse(filePath);
+    const matchExt = this.validFileExt(filePath);
+    const matchName = name.endsWith(".test");
+
+    return !matchName && matchExt && file;
+  };
+
+  /**
+   * test we should skip a directory
+   * @param {string} p
+   * @param {Array.<string>} toSkip - array of folders name to skip
+   * @returns {boolean}
+   */
+  private isValidDirectory = async (p: string): Promise<boolean> => {
+    const isDir = await isDirectory(p);
+    const { name } = parse(p);
+    const foundAMatch = this.skip.find((m) => name === m);
+
+    return !foundAMatch && isDir;
   };
 }

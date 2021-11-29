@@ -127,27 +127,6 @@ export const readDirectory = async (dirPath: string) => {
 };
 
 /**
- * test we should skip a directory
- * @param {string} p
- * @param {Array.<string>} toSkip - array of folders name to skip
- * @returns {boolean}
- */
-export const isValidDirectory = async (
-  p: string,
-  toSkip: Array<string>
-): Promise<boolean> => {
-  const isDir = await isDirectory(p);
-  const { name } = parse(p);
-
-  if (!isDir || !name) {
-    return false;
-  }
-
-  const foundAMatch = toSkip.find((m) => name === m);
-  return !foundAMatch;
-};
-
-/**
  * test if a import statement is valid. ( start with "." for external components)
  * @param {string} imp - import path
  * @returns {boolean}
