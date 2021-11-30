@@ -103,18 +103,16 @@ class Cli {
   showResult = () => {
     console.log(this.program.name());
     console.log(
-      chalk.blue(`You created : ${this.totalComponents} components\n\n`) +
-        chalk.greenBright(
-          `You're using ${
-            this.totalComponents - this.ghosts.length
-          } components\n\n`
-        ) +
-        chalk.red(`The number of Ghosts are : ${this.ghosts.length}\n`)
+      `You created -> ${this.totalComponents} components\n\n` +
+        `You're using -> ${
+          this.totalComponents - this.ghosts.length
+        } components\n\n` +
+        `The number of Ghosts are : ${this.ghosts.length}\n`
     );
 
     this.ghosts.forEach((ghost) => {
       console.log(
-        chalk.red(`\t<${ghost.name} />`) +
+        chalk.red(`  <${ghost.name} />`) +
           " -> " +
           chalk.blueBright(`${ghost.path}`)
       );
