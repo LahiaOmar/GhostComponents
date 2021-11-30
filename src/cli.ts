@@ -89,8 +89,11 @@ class Cli {
     console.log(
       this.program.name() +
         "\n\n" +
-        "To search for non-used components, -e and -r are required : \n " +
-        `foo@bar:~$ ghostcomponents -r ./PATH_PROJECT_ROOT -e ./PATH_ENTRYPOINT_APP`
+        "To search for non-used components, -e and -r are required.\n" +
+        "If your entry point does not contain ReactDOM.render, use -rc to provide the root component name.\n\n" +
+        chalk.green(
+          "  foo@bar:~$ ghostcomponents -r ./PATH_PROJECT_ROOT -e ./PATH_ENTRYPOINT_APP -rc ROOT_COMPONENT_NAME\n"
+        )
     );
   };
 
