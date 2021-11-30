@@ -9,6 +9,12 @@ import {
 } from "./helpers/fs";
 import { AstParser, ParseResult, Component } from "./parser";
 
+interface ApiControctor {
+  rootFolder: string;
+  entryPoint: string;
+  rootComponent?: string;
+}
+
 /***
  * API
  *
@@ -22,17 +28,19 @@ export default class Api {
   private ghosts: { name: string; path: string }[] = [];
   extensions: Array<string> = [".js", ".ts", ".tsx", ".node", ".jsx"];
   private astParser: AstParser;
+  private rootComponent: string = "ReactDOM.render";
 
   /**
    * API constructor
    * @param {string} rootFolder - Path to the root folder
    * @param {string} entryPoint  - Path to the entry point
    */
-  constructor(rootFolder: string, entryPoint: string) {
+  constructor({ rootFolder, entryPoint, rootComponent }: ApiControctor) {
     this.rootFolder = rootFolder;
     this.entryPoint = entryPoint;
     this.astParser = new AstParser();
 
+    if (rootComponent) this.rootComponent = rootComponent;
     this.skip = ["node_modules", "test", "tests", "styles", ".git", ".vscode"];
     this.resolvePath();
   }
@@ -51,7 +59,7 @@ export default class Api {
   async searchGhost() {
     await this.findAllComponents(this.rootFolder);
 
-    await this.findUsedComponents(this.entryPoint, "ReactDOM.render");
+    await this.findUsedComponents(this.entryPoint, this.rootComponent);
 
     this.findUnusedComponents();
 
@@ -162,6 +170,7 @@ export default class Api {
 
       filterNextComponents(rootComponent, fileComponents);
     }
+
     for (let { path, name } of nextComponents) {
       const { dir } = parse(filePath);
       let nextPath = join(dir, path);

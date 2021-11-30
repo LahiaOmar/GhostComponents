@@ -5,7 +5,7 @@ describe("API TESTING", () => {
   it("should detect Item component as GHOST (unused)", async () => {
     const rootFolder = "/test/mock/reactjs-todo-list/src";
     const entryPoint = "/test/mock/reactjs-todo-list/src/index.js";
-    const api = new Api(rootFolder, entryPoint);
+    const api = new Api({ rootFolder, entryPoint });
 
     const { ghosts } = await api.searchGhost();
 

@@ -17,6 +17,10 @@ class Cli {
     { option: "-u, --usage", description: "How to use the CLI" },
     { option: "-e, --entry-point <type>", description: "Path of entry point" },
     { option: "-r, --root-folder <type>", description: "Path of root folder" },
+    {
+      option: "-rc, --root-component <type>",
+      description: "Name of Root components in your app entry point",
+    },
   ];
   private program: Command;
   private enq: Enquirer;
@@ -53,8 +57,12 @@ class Cli {
    * @param {string} rootFolder
    * @param {string} entryPoint
    */
-  start = async (rootFolder: string, entryPoint: string) => {
-    const api = new Api(rootFolder, entryPoint);
+  start = async (
+    rootFolder: string,
+    entryPoint: string,
+    rootComponent: string
+  ) => {
+    const api = new Api({ rootFolder, entryPoint, rootComponent });
     const { ghosts, totalComponents } = await api.searchGhost();
     this.ghosts = ghosts;
     this.totalComponents = totalComponents;

@@ -6,7 +6,7 @@ import Cli from "./cli";
   const cli = new Cli();
   await cli.initCLI();
 
-  const { usage, rootFolder, entryPoint } = cli.argvParsing();
+  const { usage, rootFolder, entryPoint, rootComponent } = cli.argvParsing();
 
   if (usage) {
     cli.showUsage();
@@ -15,7 +15,7 @@ import Cli from "./cli";
 
   if (rootFolder && entryPoint) {
     try {
-      await cli.start(rootFolder, entryPoint);
+      await cli.start(rootFolder, entryPoint, rootComponent);
 
       cli.showResult();
     } catch (ex: any) {
