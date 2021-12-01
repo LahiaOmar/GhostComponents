@@ -218,7 +218,7 @@ export default class Api {
    */
   private findUnusedComponents() {
     this.allComponents.forEach(({ components }, key) => {
-      components.forEach(({ info, tags }) => {
+      components.forEach(({ info }) => {
         const componentName = info.name;
         const found = this.usedComponents.find(
           ({ name, path }) => key === path && name === componentName

@@ -1,7 +1,6 @@
 import { Command, OptionValues } from "commander";
-import Enquirer from "enquirer";
 import Api from "./api";
-import { version, name } from "../package.json";
+import { version } from "../package.json";
 import chalk from "chalk";
 import { asciiArt } from "./helpers/ascii-art";
 interface Option {
@@ -23,7 +22,6 @@ class Cli {
     },
   ];
   private program: Command;
-  private enq: Enquirer;
   private ghosts: { name: string; path: string }[] = [];
   private totalComponents: number = 0;
   private options: OptionValues = {};
@@ -33,7 +31,6 @@ class Cli {
    */
   constructor() {
     this.program = new Command();
-    this.enq = new Enquirer();
 
     this.CLIOptions.forEach(({ option, description }) => {
       this.program.option(option, description);
