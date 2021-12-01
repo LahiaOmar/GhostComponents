@@ -134,3 +134,14 @@ export const readDirectory = async (dirPath: string) => {
 export const isValideImport = (imp: string) => {
   return imp.startsWith(".");
 };
+
+/**
+ *
+ * @param {string} a - string to match
+ * @param {RegExp} b - pattern to match with
+ * @returns {Boolean}
+ */
+export const matchRegex = (a: string, b: RegExp) => {
+  const reg = new RegExp(b);
+  return reg.test(a);
+};
