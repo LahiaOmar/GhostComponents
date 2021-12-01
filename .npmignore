@@ -1,0 +1,9 @@
+# folder
+src
+test
+node_modules
+
+#files
+tsconfig.json
+babel.config.cjs
+jest.config.cjs
