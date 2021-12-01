@@ -6,6 +6,7 @@ import {
   join,
   parse,
   findFileExtension,
+  matchRegex,
 } from "./helpers/fs";
 import { AstParser, ParseResult, Component } from "./parser";
 
@@ -15,6 +16,10 @@ interface ApiControctor {
   rootComponent?: string;
 }
 
+interface Skip {
+  pattern: RegExp;
+}
+
 /***
  * API
  *
@@ -22,7 +27,12 @@ interface ApiControctor {
 export default class Api {
   private rootFolder: string;
   private entryPoint: string;
-  private skip: Array<string>;
+  private skip: Skip[] = [
+    { pattern: /node_modules/ },
+    { pattern: /test/ },
+    { pattern: /tests/ },
+    { pattern: /^\.[\w-]*/gm },
+  ];
   private allComponents: Map<string, ParseResult> = new Map();
   private usedComponents: { name: string; path: string }[] = [];
   private ghosts: { name: string; path: string }[] = [];
@@ -41,7 +51,6 @@ export default class Api {
     this.astParser = new AstParser();
 
     if (rootComponent) this.rootComponent = rootComponent;
-    this.skip = ["node_modules", "test", "tests", "styles", ".git", ".vscode"];
     this.resolvePath();
   }
 
@@ -331,7 +340,10 @@ export default class Api {
   private isValidDirectory = async (p: string): Promise<boolean> => {
     const isDir = await isDirectory(p);
     const { name } = parse(p);
-    const foundAMatch = this.skip.find((m) => name === m);
+
+    const foundAMatch = this.skip.find(({ pattern }) => {
+      return matchRegex(name, pattern);
+    });
 
     return !foundAMatch && isDir;
   };
