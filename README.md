@@ -2,15 +2,22 @@
 
 - GhostComponents it's NodeJS CLI that can help you to find all React Components non-used in your app Tree Components.
 
-- CLI Actual Status :
-  - Not published yet.
-  - Working on Errors handling, and Docs.
+## Support
 
-## How to use it.
+- Project created by create-react-app or any from scratch configuration.
+- We don't support projects that use different syntax for importing components, like NextJS. we working on that for the next release/patches.
+
+## Installation
+
+```
+  npm install -g ghostcomponents
+```
+
+## How to use it
+
+- if your entry point does not contain ReactDOM.render(), use -rc ROOT_COMPONENT_NAME as option to the CLI
 
 ```properties
-  foo@bar:~$ git clone https://github.com/LahiaOmar/GhostComponents.git
-  foo@bar:~$ cd GhostComponents
-  foo@bar:~$ npm i
-  foo@bar:~$ npx ts-node src/index.ts -r YOUR_ROOT_PROJECT -e PATH_ENTRY_POINT
+  foo@bar:~$ ghostcomponents -r YOUR_ROOT_PROJECT -e PATH_ENTRY_POINT
+  foo@bar:~$ ghostcomponents -r YOUR_ROOT_PROJECT -e PATH_ENTRY_POINT -rc ROOT_COMPONENT_NAME
 ```
