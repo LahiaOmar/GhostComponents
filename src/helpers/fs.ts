@@ -136,3 +136,19 @@ export const matchRegex = (a: string, b: RegExp) => {
   const reg = new RegExp(b);
   return reg.test(a);
 };
+
+/**
+ * read a json file.
+ * @param {string} filePath - json file path
+ * @returns json content.
+ */
+export const readJSONFile = async (
+  filePath: string
+): Promise<string | null> => {
+  const foundJSONFile = await isFile(filePath);
+  if (!foundJSONFile) return null;
+
+  const content = await readFile(filePath);
+
+  return content;
+};
