@@ -7,6 +7,7 @@ import {
   parse,
   findFileExtension,
   matchRegex,
+  readJSONFile,
 } from "./helpers/fs";
 import { AstParser, ParseResult, Component } from "./parser";
 
@@ -18,6 +19,11 @@ interface ApiConstructor {
 
 interface Skip {
   pattern: RegExp;
+}
+
+interface ModuleAliases {
+  baseUrl?: string;
+  paths?: Map<string, string[]>;
 }
 
 /***
@@ -39,7 +45,7 @@ export default class Api {
   extensions: Array<string> = [".js", ".ts", ".tsx", ".node", ".jsx"];
   private astParser: AstParser;
   private rootComponent: string = "ReactDOM.render";
-
+  private moduleConfigAliases: ModuleAliases = {};
   /**
    * API constructor
    * @param {string} rootFolder - Path to the root folder
@@ -52,7 +58,38 @@ export default class Api {
 
     if (rootComponent) this.rootComponent = rootComponent;
     this.resolvePath();
+    this.loadModuleAliases();
   }
+
+  /**
+   * Load jsconfig.json or tsconfig.json to resolve module aliases patterns.
+   */
+  private loadModuleAliases = async () => {
+    const JS_CONFIG_PATH = join(this.rootFolder, "jsconfig.json");
+    const TS_CONFIG_PATH = join(this.rootFolder, "tsconfig.json");
+
+    // loading jsconfig and tsconfig.
+    const jsConfig = await readJSONFile(JS_CONFIG_PATH);
+    const tsConfig = await readJSONFile(TS_CONFIG_PATH);
+
+    jsConfig && this.parseConfigModuleAliases(jsConfig);
+    tsConfig && this.parseConfigModuleAliases(tsConfig);
+  };
+
+  /**
+   * resolve path and baseUrl for a jsconfig or tsconfig files.
+   * @param content - file content
+   */
+  private parseConfigModuleAliases = (content: string) => {
+    const { baseUrl, paths } = JSON.parse(content);
+
+    if (baseUrl) {
+      this.moduleConfigAliases.baseUrl = baseUrl;
+    }
+    if (paths) {
+      this.moduleConfigAliases.paths = paths;
+    }
+  };
 
   /**
    * Join the root folder and entry point path with the path of current process.
