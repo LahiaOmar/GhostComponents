@@ -10,7 +10,7 @@ import {
 } from "./helpers/fs";
 import { AstParser, ParseResult, Component } from "./parser";
 
-interface ApiControctor {
+interface ApiConstructor {
   rootFolder: string;
   entryPoint: string;
   rootComponent?: string;
@@ -45,7 +45,7 @@ export default class Api {
    * @param {string} rootFolder - Path to the root folder
    * @param {string} entryPoint  - Path to the entry point
    */
-  constructor({ rootFolder, entryPoint, rootComponent }: ApiControctor) {
+  constructor({ rootFolder, entryPoint, rootComponent }: ApiConstructor) {
     this.rootFolder = rootFolder;
     this.entryPoint = entryPoint;
     this.astParser = new AstParser();
