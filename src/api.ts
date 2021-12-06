@@ -57,9 +57,13 @@ export default class Api {
     this.astParser = new AstParser();
 
     if (rootComponent) this.rootComponent = rootComponent;
-    this.resolvePath();
     this.loadModuleAliases();
   }
+
+  initAPI = async () => {
+    this.resolvePath();
+    await this.loadModuleAliases();
+  };
 
   /**
    * Load jsconfig.json or tsconfig.json to resolve module aliases patterns.

@@ -60,6 +60,7 @@ class Cli {
     rootComponent: string
   ) => {
     const api = new Api({ rootFolder, entryPoint, rootComponent });
+    await api.initAPI();
     const { ghosts, totalComponents } = await api.searchGhost();
     this.ghosts = ghosts;
     this.totalComponents = totalComponents;

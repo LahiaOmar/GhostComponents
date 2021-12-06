@@ -7,6 +7,7 @@ describe("API TESTING", () => {
     const entryPoint = "/test/mock/reactjs-todo-list/src/index.js";
     const api = new Api({ rootFolder, entryPoint });
 
+    await api.initAPI();
     const { ghosts } = await api.searchGhost();
 
     expect(ghosts).toContainEqual({
