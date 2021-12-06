@@ -1,8 +1,6 @@
 import { parse } from "@babel/parser";
 import { File, Node } from "@babel/types";
 
-import { isValideImport } from "./helpers/fs";
-
 type specifierNode = { local: string; imported: string };
 export interface ImportNode {
   source: string;
@@ -157,7 +155,7 @@ export class AstParser {
     if (node.type === "ImportDeclaration") {
       const { source, specifiers } = node;
       let sps: Array<specifierNode> = [];
-      if (isValideImport(source.value)) {
+      if (this.isValideImport(source.value)) {
         specifiers.forEach((sp) => {
           let local = "",
             imported = "";
@@ -427,5 +425,14 @@ export class AstParser {
     });
 
     return isValid;
+  };
+
+  /**
+   * test if a import statement is valid. ( start with "." for external components)
+   * @param {string} imp - import path
+   * @returns {boolean}
+   */
+  private isValideImport = (imp: string) => {
+    return imp.startsWith(".");
   };
 }

@@ -127,15 +127,6 @@ export const readDirectory = async (dirPath: string) => {
 };
 
 /**
- * test if a import statement is valid. ( start with "." for external components)
- * @param {string} imp - import path
- * @returns {boolean}
- */
-export const isValideImport = (imp: string) => {
-  return imp.startsWith(".");
-};
-
-/**
  *
  * @param {string} a - string to match
  * @param {RegExp} b - pattern to match with
