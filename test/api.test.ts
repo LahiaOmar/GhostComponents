@@ -18,4 +18,23 @@ describe("API TESTING", () => {
       ),
     });
   });
+
+  it("should parse jsconfig.json for ModuleAliases", async () => {
+    try {
+      const rootFolder = "/test/mock/reactjs-todo-list/";
+      const entryPoint = "/test/mock/reactjs-todo-list/src/index.js";
+      const api = new Api({ rootFolder, entryPoint });
+
+      await api.initAPI();
+
+      const source = await api.resolveSourceImport(
+        "/home/lahiaomar/Documents/projects/Libs/GhostComponents/test/mock/reactjs-todo-list/src/component/Done.js",
+        "src/component/Header/"
+      );
+
+      expect(source).toBe("../Header");
+    } catch (ex) {
+      console.log("test  ex", ex);
+    }
+  });
 });
