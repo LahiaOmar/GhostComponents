@@ -152,3 +152,13 @@ export const readJSONFile = async (
 
   return content;
 };
+
+/**
+ * Find the relative path between from and to.
+ * @param {string} - from
+ * @param {string} - to
+ * @returns {string}
+ */
+export const relative = (from: string, to: string) => {
+  return path.relative(from, to);
+};
