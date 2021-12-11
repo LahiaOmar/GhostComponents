@@ -8,6 +8,7 @@ import {
   findFileExtension,
   matchRegex,
   readJSONFile,
+  relative,
 } from "./helpers/fs";
 import { AstParser, ParseResult, Component } from "./parser";
 
@@ -23,7 +24,9 @@ interface Skip {
 
 interface ModuleAliases {
   baseUrl?: string;
-  paths?: Map<string, string[]>;
+  paths?: {
+    [key: string]: string[];
+  };
 }
 
 /***
@@ -57,7 +60,6 @@ export default class Api {
     this.astParser = new AstParser();
 
     if (rootComponent) this.rootComponent = rootComponent;
-    this.loadModuleAliases();
   }
 
   initAPI = async () => {
@@ -85,7 +87,9 @@ export default class Api {
    * @param content - file content
    */
   private parseConfigModuleAliases = (content: string) => {
-    const { baseUrl, paths } = JSON.parse(content);
+    const {
+      compilerOptions: { baseUrl, paths },
+    } = JSON.parse(content);
 
     if (baseUrl) {
       this.moduleConfigAliases.baseUrl = baseUrl;
@@ -177,7 +181,7 @@ export default class Api {
     const nextComponents: { name: string; path: string }[] = [];
 
     //find local used components, and find the next external components.
-    const filterNextComponents = (
+    const filterNextComponents = async (
       current: Component,
       components: Component[]
     ) => {
@@ -196,14 +200,26 @@ export default class Api {
           components = components.filter((_, index) => index !== foundNext);
           filterNextComponents(nextComponent, components);
         } else {
-          const foundExternal = importStatements.find(
-            ({ source, specifiers }) => {
-              const found = specifiers.find((sp) => sp.local === tag);
-              return found && source.startsWith(".");
+          let importSource: string | null = null;
+
+          for (const { source, specifiers } of importStatements) {
+            // console.log({ source });
+            const foundLoaclName = specifiers.find(
+              ({ local }) => local === tag
+            );
+            if (foundLoaclName) {
+              const resolveSource = await this.resolveSourceImport(
+                filePath,
+                source
+              );
+              if (resolveSource) {
+                importSource = resolveSource;
+              }
             }
-          );
-          if (foundExternal) {
-            nextComponents.push({ name: tag, path: foundExternal.source });
+          }
+
+          if (importSource) {
+            nextComponents.push({ name: tag, path: importSource });
           }
         }
       }
@@ -218,7 +234,7 @@ export default class Api {
         path: filePath,
       });
 
-      filterNextComponents(rootComponent, fileComponents);
+      await filterNextComponents(rootComponent, fileComponents);
     }
 
     for (let { path, name } of nextComponents) {
@@ -387,5 +403,50 @@ export default class Api {
     });
 
     return !foundAMatch && isDir;
+  };
+
+  /**
+   * Resolve the source of the import.
+   *  - if the import is based on Module Aliases, it's transform to relative path.
+   * @param source
+   * @returns {string | null} - string if the source is for an external component, null : otherwise
+   */
+  resolveSourceImport = async (
+    filePath: string,
+    source: string
+  ): Promise<string | null> => {
+    const isValid: boolean[] = [];
+    const { baseUrl, paths } = this.moduleConfigAliases;
+    // null case. if !./ and no moduleAliases.
+    const normalSource = source.startsWith(".");
+    if (normalSource) return source;
+
+    if (!baseUrl) return null;
+    let originalSource = "";
+    if (baseUrl) {
+      if (!paths) {
+        // the source is base on just baseUrl
+        originalSource = relative(filePath, join(this.rootFolder, source));
+      } else {
+        // the source is base on baseUrl + paths[i]
+        for (const path in paths) {
+          const _path = path.replace(/\*/, "");
+
+          if (source.startsWith(_path)) {
+            for (let p of paths[path]) {
+              p = p.replace(/\*/, "");
+              let _source = source.replace(_path, p);
+
+              const { dir } = parse(filePath);
+              originalSource = relative(dir, join(this.rootFolder, _source));
+              if (!originalSource.startsWith(".")) {
+                originalSource = "./" + originalSource;
+              }
+            }
+          }
+        }
+      }
+    }
+    return originalSource;
   };
 }
