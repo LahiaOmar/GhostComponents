@@ -155,24 +155,19 @@ export class AstParser {
     if (node.type === "ImportDeclaration") {
       const { source, specifiers } = node;
       let sps: Array<specifierNode> = [];
-      if (this.isValideImport(source.value)) {
-        specifiers.forEach((sp) => {
-          let local = "",
-            imported = "";
-          if (
-            sp.type === "ImportSpecifier" &&
-            sp.imported.type == "Identifier"
-          ) {
-            local = sp.local.name;
-            imported = sp.imported.name;
-          } else if (sp.type === "ImportDefaultSpecifier") {
-            local = sp.local.name;
-            imported = sp.local.name;
-          }
-          sps.push({ local, imported });
-        });
-        this.imports.push({ source: source.value, specifiers: sps });
-      }
+      specifiers.forEach((sp) => {
+        let local = "",
+          imported = "";
+        if (sp.type === "ImportSpecifier" && sp.imported.type == "Identifier") {
+          local = sp.local.name;
+          imported = sp.imported.name;
+        } else if (sp.type === "ImportDefaultSpecifier") {
+          local = sp.local.name;
+          imported = sp.local.name;
+        }
+        sps.push({ local, imported });
+      });
+      this.imports.push({ source: source.value, specifiers: sps });
     }
   };
 
